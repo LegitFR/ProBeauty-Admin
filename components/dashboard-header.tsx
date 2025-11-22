@@ -1,0 +1,138 @@
+"use client";
+
+import { useState } from "react";
+import {
+  Search,
+  Bell,
+  Moon,
+  Sun,
+  User,
+  Menu,
+  Settings,
+  LogOut,
+} from "lucide-react";
+import { Button } from "./ui/button";
+import { Input } from "./ui/input";
+import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+import { Badge } from "./ui/badge";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "./ui/dropdown-menu";
+import { ProfileModal } from "./profile-modal";
+
+interface DashboardHeaderProps {
+  isDark: boolean;
+  toggleTheme: () => void;
+  toggleSidebar: () => void;
+  notificationCount: number;
+}
+
+export function DashboardHeader({
+  isDark,
+  toggleTheme,
+  toggleSidebar,
+  notificationCount,
+}: DashboardHeaderProps) {
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  return (
+    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="flex h-16 items-center px-6">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="md:hidden"
+          onClick={toggleSidebar}
+        >
+          <Menu className="h-5 w-5" />
+        </Button>
+
+        <div className="flex-1 flex items-center gap-4 ml-4 md:ml-0">
+          <div className="relative max-w-md w-full">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search salons, customers, bookings..."
+              className="pl-10 bg-muted/50"
+            />
+          </div>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={toggleTheme}
+            className="rounded-2xl"
+          >
+            {isDark ? (
+              <Sun className="h-5 w-5" />
+            ) : (
+              <Moon className="h-5 w-5" />
+            )}
+          </Button>
+
+          <Button variant="ghost" size="icon" className="relative rounded-2xl">
+            <Bell className="h-5 w-5" />
+            {notificationCount > 0 && (
+              <Badge
+                variant="destructive"
+                className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs"
+              >
+                {notificationCount > 9 ? "9+" : notificationCount}
+              </Badge>
+            )}
+          </Button>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                className="relative h-10 w-10 rounded-2xl"
+              >
+                <Avatar className="h-9 w-9">
+                  <AvatarImage src="/api/placeholder/32/32" alt="Admin" />
+                  <AvatarFallback className="bg-primary text-primary-foreground">
+                    PA
+                  </AvatarFallback>
+                </Avatar>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-56" align="end" forceMount>
+              <DropdownMenuLabel className="font-normal">
+                <div className="flex flex-col space-y-1">
+                  <p className="font-medium leading-none">ProBeauty Admin</p>
+                  <p className="text-xs leading-none text-muted-foreground">
+                    admin@probeauty.com
+                  </p>
+                </div>
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => setIsProfileModalOpen(true)}>
+                <User className="mr-2 h-4 w-4" />
+                <span>Profile</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setIsProfileModalOpen(true)}>
+                <Settings className="mr-2 h-4 w-4" />
+                <span>Settings</span>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem className="text-red-600">
+                <LogOut className="mr-2 h-4 w-4" />
+                <span>Log out</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </div>
+
+      <ProfileModal
+        isOpen={isProfileModalOpen}
+        onClose={() => setIsProfileModalOpen(false)}
+      />
+    </header>
+  );
+}
