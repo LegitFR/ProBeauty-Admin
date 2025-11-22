@@ -359,30 +359,30 @@ export function SystemHealth() {
   ).length;
 
   return (
-    <div className="space-y-6 p-6">
-      <div className="flex justify-between items-center">
+    <div className="space-y-4 sm:space-y-6 p-4 sm:p-6 max-w-full overflow-x-hidden">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold flex items-center gap-3">
+          <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-3">
             <Shield className="h-8 w-8 text-primary" />
             System Health Monitor
           </h1>
-          <p className="text-muted-foreground mt-1">
+          <p className="text-sm sm:text-base text-muted-foreground mt-1">
             Real-time system monitoring, performance metrics, and security
             alerts
           </p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Clock className="h-4 w-4" />
             Last update: {lastRefresh.toLocaleTimeString()}
           </div>
-          <Button variant="outline" className="rounded-2xl">
+          <Button variant="outline" className="rounded-2xl w-full sm:w-auto">
             <Download className="h-4 w-4 mr-2" />
             Export Report
           </Button>
           <Button
             onClick={() => setLastRefresh(new Date())}
-            className="bg-primary hover:bg-primary/90 rounded-2xl"
+            className="bg-primary hover:bg-primary/90 rounded-2xl w-full sm:w-auto"
           >
             <RefreshCw className="h-4 w-4 mr-2" />
             Refresh
@@ -464,26 +464,42 @@ export function SystemHealth() {
         onValueChange={setActiveTab}
         className="space-y-6"
       >
-        <TabsList className="grid w-full grid-cols-5 rounded-2xl">
-          <TabsTrigger value="overview" className="rounded-xl">
-            <Monitor className="h-4 w-4 mr-2" />
-            Overview
+        <TabsList className="grid w-full grid-cols-5 rounded-2xl p-0.5 sm:p-1 gap-0.5 sm:gap-1">
+          <TabsTrigger
+            value="overview"
+            className="rounded-xl text-[10px] sm:text-sm px-1 sm:px-3 py-1.5 sm:py-2"
+          >
+            <Monitor className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
+            <span className="hidden md:inline">Overview</span>
           </TabsTrigger>
-          <TabsTrigger value="services" className="rounded-xl">
-            <Server className="h-4 w-4 mr-2" />
-            Services
+          <TabsTrigger
+            value="services"
+            className="rounded-xl text-[10px] sm:text-sm px-1 sm:px-3 py-1.5 sm:py-2"
+          >
+            <Server className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
+            <span className="hidden md:inline">Services</span>
           </TabsTrigger>
-          <TabsTrigger value="metrics" className="rounded-xl">
-            <Gauge className="h-4 w-4 mr-2" />
-            Metrics
+          <TabsTrigger
+            value="metrics"
+            className="rounded-xl text-[10px] sm:text-sm px-1 sm:px-3 py-1.5 sm:py-2"
+          >
+            <Gauge className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
+            <span className="hidden md:inline">Metrics</span>
           </TabsTrigger>
-          <TabsTrigger value="security" className="rounded-xl">
-            <Lock className="h-4 w-4 mr-2" />
-            Security
+          <TabsTrigger
+            value="security"
+            className="rounded-xl text-[10px] sm:text-sm px-1 sm:px-3 py-1.5 sm:py-2"
+          >
+            <Lock className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
+            <span className="hidden md:inline">Security</span>
           </TabsTrigger>
-          <TabsTrigger value="logs" className="rounded-xl">
-            <BarChart3 className="h-4 w-4 mr-2" />
-            Performance
+          <TabsTrigger
+            value="logs"
+            className="rounded-xl text-[10px] sm:text-sm px-1 sm:px-3 py-1.5 sm:py-2"
+          >
+            <BarChart3 className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
+            <span className="hidden md:inline">Perf</span>
+            <span className="hidden lg:inline">ormance</span>
           </TabsTrigger>
         </TabsList>
 
@@ -513,7 +529,7 @@ export function SystemHealth() {
           </Card>
 
           {/* System Metrics Overview */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
             <Card>
               <CardHeader>
                 <CardTitle>System Metrics</CardTitle>
@@ -741,7 +757,7 @@ export function SystemHealth() {
         </TabsContent>
 
         <TabsContent value="metrics" className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
             {metrics.map((metric) => {
               const TrendIcon = getTrendIcon(metric.trend);
               return (

@@ -249,22 +249,22 @@ export function NotificationSettings() {
   const unreadCount = notifications.filter((n) => !n.read).length;
 
   return (
-    <div className="space-y-6 p-6">
-      <div className="flex justify-between items-center">
+    <div className="space-y-4 sm:space-y-6 p-4 sm:p-6 max-w-full overflow-x-hidden">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold flex items-center gap-3">
+          <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-3">
             <Bell className="h-8 w-8 text-primary" />
             Notification Center
           </h1>
-          <p className="text-muted-foreground mt-1">
+          <p className="text-sm sm:text-base text-muted-foreground mt-1">
             Manage notifications, alerts, and communication preferences
           </p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
           <Badge variant="outline" className="rounded-full">
             {unreadCount} Unread
           </Badge>
-          <Button className="bg-primary hover:bg-primary/90 rounded-2xl">
+          <Button className="bg-primary hover:bg-primary/90 rounded-2xl w-full sm:w-auto">
             <Settings className="h-4 w-4 mr-2" />
             Configure
           </Button>
@@ -276,38 +276,48 @@ export function NotificationSettings() {
         onValueChange={setActiveTab}
         className="space-y-6"
       >
-        <TabsList className="grid w-full grid-cols-3 rounded-2xl">
-          <TabsTrigger value="notifications" className="rounded-xl">
-            <BellRing className="h-4 w-4 mr-2" />
-            Recent Notifications
+        <TabsList className="grid w-full grid-cols-3 rounded-2xl p-1">
+          <TabsTrigger
+            value="notifications"
+            className="rounded-xl text-xs sm:text-sm px-2 sm:px-3"
+          >
+            <BellRing className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
+            <span className="hidden sm:inline">Recent</span>
+            <span className="hidden md:inline"> Notifications</span>
           </TabsTrigger>
-          <TabsTrigger value="settings" className="rounded-xl">
-            <Settings className="h-4 w-4 mr-2" />
-            Preferences
+          <TabsTrigger
+            value="settings"
+            className="rounded-xl text-xs sm:text-sm px-2 sm:px-3"
+          >
+            <Settings className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
+            <span className="hidden xs:inline">Preferences</span>
           </TabsTrigger>
-          <TabsTrigger value="channels" className="rounded-xl">
-            <MessageSquare className="h-4 w-4 mr-2" />
-            Channels
+          <TabsTrigger
+            value="channels"
+            className="rounded-xl text-xs sm:text-sm px-2 sm:px-3"
+          >
+            <MessageSquare className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
+            <span className="hidden xs:inline">Channels</span>
           </TabsTrigger>
         </TabsList>
 
         <TabsContent value="notifications" className="space-y-6">
           {/* Search and Filter Bar */}
-          <Card className="p-4">
-            <div className="flex flex-col md:flex-row gap-4">
+          <Card className="p-3 sm:p-4">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   placeholder="Search notifications..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
+                  className="pl-10 h-9 sm:h-10 text-sm"
                 />
               </div>
-              <div className="flex items-center gap-3">
-                <Filter className="h-4 w-4 text-muted-foreground" />
+              <div className="flex items-center gap-2 sm:gap-3">
+                <Filter className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                 <Select value={filterType} onValueChange={setFilterType}>
-                  <SelectTrigger className="w-48">
+                  <SelectTrigger className="w-full sm:w-40 h-9 sm:h-10 text-sm">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -326,12 +336,14 @@ export function NotificationSettings() {
 
           {/* Notification List */}
           <Card>
-            <CardHeader>
-              <CardTitle>Recent Activity</CardTitle>
+            <CardHeader className="p-3 sm:p-6">
+              <CardTitle className="text-base sm:text-lg">
+                Recent Activity
+              </CardTitle>
             </CardHeader>
             <CardContent className="p-0">
-              <ScrollArea className="h-[600px]">
-                <div className="space-y-1 p-6">
+              <ScrollArea className="h-[400px] sm:h-[500px] lg:h-[600px]">
+                <div className="space-y-1 p-3 sm:p-6">
                   {filteredNotifications.map((notification, index) => {
                     const IconComponent = getNotificationIcon(
                       notification.type
@@ -339,14 +351,14 @@ export function NotificationSettings() {
                     return (
                       <div key={notification.id}>
                         <div
-                          className={`flex items-start gap-4 p-4 rounded-xl hover:bg-muted/50 transition-colors ${
+                          className={`flex items-start gap-2 sm:gap-4 p-2 sm:p-4 rounded-xl hover:bg-muted/50 transition-colors ${
                             !notification.read
                               ? "bg-primary-light border border-primary/20"
                               : ""
                           }`}
                         >
                           <div
-                            className={`p-2 rounded-xl ${
+                            className={`p-1.5 sm:p-2 rounded-xl flex-shrink-0 ${
                               notification.type === "booking"
                                 ? "bg-blue-100 text-blue-600"
                                 : notification.type === "payment"
@@ -360,26 +372,28 @@ export function NotificationSettings() {
                                 : "bg-red-100 text-red-600"
                             }`}
                           >
-                            <IconComponent className="h-5 w-5" />
+                            <IconComponent className="h-4 w-4 sm:h-5 sm:w-5" />
                           </div>
 
                           <div className="flex-1 min-w-0">
                             <div className="flex items-start justify-between gap-2">
-                              <div className="flex-1">
-                                <h4 className="font-medium text-sm">
+                              <div className="flex-1 min-w-0">
+                                <h4 className="font-medium text-xs sm:text-sm truncate">
                                   {notification.title}
                                 </h4>
-                                <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
+                                <p className="text-xs sm:text-sm text-muted-foreground mt-1 line-clamp-2">
                                   {notification.message}
                                 </p>
-                                <div className="flex items-center gap-3 mt-2">
-                                  <span className="text-xs text-muted-foreground flex items-center gap-1">
+                                <div className="flex flex-wrap items-center gap-2 sm:gap-3 mt-2">
+                                  <span className="text-[10px] sm:text-xs text-muted-foreground flex items-center gap-1">
                                     <Clock className="h-3 w-3" />
-                                    {notification.timestamp}
+                                    <span className="truncate">
+                                      {notification.timestamp}
+                                    </span>
                                   </span>
                                   <Badge
                                     variant="outline"
-                                    className={`text-xs rounded-full ${getPriorityColor(
+                                    className={`text-[10px] sm:text-xs rounded-full ${getPriorityColor(
                                       notification.priority
                                     )}`}
                                   >
@@ -387,25 +401,25 @@ export function NotificationSettings() {
                                   </Badge>
                                   <Badge
                                     variant="secondary"
-                                    className="text-xs rounded-full"
+                                    className="text-[10px] sm:text-xs rounded-full hidden sm:inline-flex"
                                   >
                                     {notification.category}
                                   </Badge>
                                 </div>
                               </div>
 
-                              <div className="flex items-center gap-2">
+                              <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
                                 {notification.read ? (
-                                  <CheckCircle className="h-4 w-4 text-green-500" />
+                                  <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4 text-green-500" />
                                 ) : (
                                   <div className="h-2 w-2 bg-primary rounded-full"></div>
                                 )}
                                 <Button
                                   variant="ghost"
                                   size="sm"
-                                  className="rounded-xl"
+                                  className="rounded-xl h-7 w-7 sm:h-8 sm:w-8 p-0"
                                 >
-                                  <XCircle className="h-4 w-4" />
+                                  <XCircle className="h-3 w-3 sm:h-4 sm:w-4" />
                                 </Button>
                               </div>
                             </div>

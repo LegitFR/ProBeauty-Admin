@@ -195,31 +195,37 @@ export function CustomerManagement() {
   };
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-4 sm:space-y-6 p-4 sm:p-6 max-w-full overflow-x-hidden">
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold">Customer Management</h1>
-          <p className="text-muted-foreground mt-1">
+          <h1 className="text-2xl sm:text-3xl font-bold">
+            Customer Management
+          </h1>
+          <p className="text-sm sm:text-base text-muted-foreground mt-1">
             Manage customer relationships and analyze customer behavior
           </p>
         </div>
-        <Button className="bg-primary hover:bg-primary/90 rounded-2xl">
-          Add New Customer
-        </Button>
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+          <Button className="bg-primary hover:bg-primary/90 rounded-2xl w-full sm:w-auto">
+            Add New Customer
+          </Button>
+        </div>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card className="p-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
+        <Card className="p-4 sm:p-6">
           <CardContent className="p-0">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-blue-100 rounded-xl">
-                <Users className="h-5 w-5 text-blue-600" />
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="p-1.5 sm:p-2 bg-blue-100 rounded-xl">
+                <Users className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Total Customers</p>
-                <p className="text-2xl font-bold">
+                <p className="text-xs sm:text-sm text-muted-foreground">
+                  Total Customers
+                </p>
+                <p className="text-xl sm:text-2xl font-bold">
                   {totalCustomers.toLocaleString()}
                 </p>
               </div>
@@ -227,47 +233,53 @@ export function CustomerManagement() {
           </CardContent>
         </Card>
 
-        <Card className="p-6">
+        <Card className="p-4 sm:p-6">
           <CardContent className="p-0">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-green-100 rounded-xl">
-                <TrendingUp className="h-5 w-5 text-green-600" />
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="p-1.5 sm:p-2 bg-green-100 rounded-xl">
+                <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-green-600" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-xs sm:text-sm text-muted-foreground">
                   Active Customers
                 </p>
-                <p className="text-2xl font-bold">{activeCustomers}</p>
+                <p className="text-xl sm:text-2xl font-bold">
+                  {activeCustomers}
+                </p>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="p-6">
+        <Card className="p-4 sm:p-6">
           <CardContent className="p-0">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-purple-100 rounded-xl">
-                <Heart className="h-5 w-5 text-purple-600" />
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="p-1.5 sm:p-2 bg-purple-100 rounded-xl">
+                <Heart className="h-4 w-4 sm:h-5 sm:w-5 text-purple-600" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">VIP Customers</p>
-                <p className="text-2xl font-bold">{vipCustomers}</p>
+                <p className="text-xs sm:text-sm text-muted-foreground">
+                  VIP Customers
+                </p>
+                <p className="text-xl sm:text-2xl font-bold">{vipCustomers}</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="p-6">
+        <Card className="p-4 sm:p-6">
           <CardContent className="p-0">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-yellow-100 rounded-xl">
-                <DollarSign className="h-5 w-5 text-yellow-600" />
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="p-1.5 sm:p-2 bg-yellow-100 rounded-xl">
+                <DollarSign className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-600" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-xs sm:text-sm text-muted-foreground">
                   Avg Customer Value
                 </p>
-                <p className="text-2xl font-bold">${avgSpent.toFixed(0)}</p>
+                <p className="text-xl sm:text-2xl font-bold">
+                  ${avgSpent.toFixed(0)}
+                </p>
               </div>
             </div>
           </CardContent>
@@ -317,8 +329,8 @@ export function CustomerManagement() {
       </Card>
 
       {/* Customer Insights */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <Card className="p-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
+        <Card className="p-4 sm:p-6">
           <CardHeader className="p-0 pb-4">
             <CardTitle className="text-lg">Customer Lifecycle</CardTitle>
           </CardHeader>
@@ -418,120 +430,125 @@ export function CustomerManagement() {
 
       {/* Customers Table */}
       <Card>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Customer</TableHead>
-              <TableHead>Contact</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Tier</TableHead>
-              <TableHead>Total Spent</TableHead>
-              <TableHead>Visits</TableHead>
-              <TableHead>Last Visit</TableHead>
-              <TableHead>Rating</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filteredCustomers.map((customer) => (
-              <TableRow key={customer.id}>
-                <TableCell>
-                  <div className="flex items-center gap-3">
-                    <Avatar className="h-10 w-10">
-                      <AvatarImage src={customer.avatar} alt={customer.name} />
-                      <AvatarFallback>
-                        {customer.name
-                          .split(" ")
-                          .map((n) => n[0])
-                          .join("")}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <p className="font-medium">{customer.name}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {customer.preferredSalon}
-                      </p>
-                    </div>
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-1 text-sm">
-                      <Mail className="h-3 w-3 text-muted-foreground" />
-                      <span>{customer.email}</span>
-                    </div>
-                    <div className="flex items-center gap-1 text-sm">
-                      <Phone className="h-3 w-3 text-muted-foreground" />
-                      <span>{customer.phone}</span>
-                    </div>
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <Badge
-                    className={`rounded-full ${getStatusColor(
-                      customer.status
-                    )}`}
-                    variant="secondary"
-                  >
-                    {customer.status}
-                  </Badge>
-                </TableCell>
-                <TableCell>
-                  <Badge
-                    className={`rounded-full ${getTierColor(customer.tier)}`}
-                    variant="secondary"
-                  >
-                    {customer.tier}
-                  </Badge>
-                </TableCell>
-                <TableCell>
-                  <span className="font-medium">
-                    ${customer.totalSpent.toLocaleString()}
-                  </span>
-                </TableCell>
-                <TableCell>
-                  <span>{customer.visits} visits</span>
-                </TableCell>
-                <TableCell>
-                  <span className="text-sm">{customer.lastVisit}</span>
-                </TableCell>
-                <TableCell>
-                  <div className="flex items-center gap-1">
-                    <Star className="h-4 w-4 text-yellow-500 fill-current" />
-                    <span>{customer.rating}</span>
-                  </div>
-                </TableCell>
-                <TableCell className="text-right">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon" className="h-8 w-8">
-                        <MoreHorizontal className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem>
-                        <Eye className="mr-2 h-4 w-4" />
-                        View Profile
-                      </DropdownMenuItem>
-                      <DropdownMenuItem>
-                        <Edit className="mr-2 h-4 w-4" />
-                        Edit Customer
-                      </DropdownMenuItem>
-                      <DropdownMenuItem>
-                        <MessageCircle className="mr-2 h-4 w-4" />
-                        Send Message
-                      </DropdownMenuItem>
-                      <DropdownMenuItem className="text-destructive">
-                        <Ban className="mr-2 h-4 w-4" />
-                        Deactivate
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </TableCell>
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Customer</TableHead>
+                <TableHead>Contact</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Tier</TableHead>
+                <TableHead>Total Spent</TableHead>
+                <TableHead>Visits</TableHead>
+                <TableHead>Last Visit</TableHead>
+                <TableHead>Rating</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {filteredCustomers.map((customer) => (
+                <TableRow key={customer.id}>
+                  <TableCell>
+                    <div className="flex items-center gap-3">
+                      <Avatar className="h-10 w-10">
+                        <AvatarImage
+                          src={customer.avatar}
+                          alt={customer.name}
+                        />
+                        <AvatarFallback>
+                          {customer.name
+                            .split(" ")
+                            .map((n) => n[0])
+                            .join("")}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <p className="font-medium">{customer.name}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {customer.preferredSalon}
+                        </p>
+                      </div>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-1 text-sm">
+                        <Mail className="h-3 w-3 text-muted-foreground" />
+                        <span>{customer.email}</span>
+                      </div>
+                      <div className="flex items-center gap-1 text-sm">
+                        <Phone className="h-3 w-3 text-muted-foreground" />
+                        <span>{customer.phone}</span>
+                      </div>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <Badge
+                      className={`rounded-full ${getStatusColor(
+                        customer.status
+                      )}`}
+                      variant="secondary"
+                    >
+                      {customer.status}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <Badge
+                      className={`rounded-full ${getTierColor(customer.tier)}`}
+                      variant="secondary"
+                    >
+                      {customer.tier}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <span className="font-medium">
+                      ${customer.totalSpent.toLocaleString()}
+                    </span>
+                  </TableCell>
+                  <TableCell>
+                    <span>{customer.visits} visits</span>
+                  </TableCell>
+                  <TableCell>
+                    <span className="text-sm">{customer.lastVisit}</span>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-1">
+                      <Star className="h-4 w-4 text-yellow-500 fill-current" />
+                      <span>{customer.rating}</span>
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem>
+                          <Eye className="mr-2 h-4 w-4" />
+                          View Profile
+                        </DropdownMenuItem>
+                        <DropdownMenuItem>
+                          <Edit className="mr-2 h-4 w-4" />
+                          Edit Customer
+                        </DropdownMenuItem>
+                        <DropdownMenuItem>
+                          <MessageCircle className="mr-2 h-4 w-4" />
+                          Send Message
+                        </DropdownMenuItem>
+                        <DropdownMenuItem className="text-destructive">
+                          <Ban className="mr-2 h-4 w-4" />
+                          Deactivate
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
       </Card>
 
       {/* Pagination */}

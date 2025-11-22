@@ -197,38 +197,40 @@ export function PaymentsFinance() {
   };
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-4 sm:space-y-6 p-4 sm:p-6 max-w-full overflow-x-hidden">
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold">Payments & Finance</h1>
-          <p className="text-muted-foreground mt-1">
+          <h1 className="text-2xl sm:text-3xl font-bold">Payments & Finance</h1>
+          <p className="text-sm sm:text-base text-muted-foreground mt-1">
             Monitor transactions, revenue, and financial performance
           </p>
         </div>
-        <div className="flex gap-3">
-          <Button variant="outline" className="rounded-2xl">
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+          <Button variant="outline" className="rounded-2xl w-full sm:w-auto">
             <Download className="h-4 w-4 mr-2" />
             Export Data
           </Button>
-          <Button className="bg-primary hover:bg-primary/90 rounded-2xl">
+          <Button className="bg-primary hover:bg-primary/90 rounded-2xl w-full sm:w-auto">
             Generate Report
           </Button>
         </div>
       </div>
 
       {/* Financial Overview Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card className="p-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
+        <Card className="p-4 sm:p-6">
           <CardContent className="p-0">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-green-100 rounded-xl">
-                  <DollarSign className="h-5 w-5 text-green-600" />
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="p-1.5 sm:p-2 bg-green-100 rounded-xl">
+                  <DollarSign className="h-4 w-4 sm:h-5 sm:w-5 text-green-600" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Total Revenue</p>
-                  <p className="text-2xl font-bold">
+                  <p className="text-xs sm:text-sm text-muted-foreground">
+                    Total Revenue
+                  </p>
+                  <p className="text-xl sm:text-2xl font-bold">
                     ${totalRevenue.toFixed(2)}
                   </p>
                 </div>
@@ -241,18 +243,20 @@ export function PaymentsFinance() {
           </CardContent>
         </Card>
 
-        <Card className="p-6">
+        <Card className="p-4 sm:p-6">
           <CardContent className="p-0">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-blue-100 rounded-xl">
-                  <CreditCard className="h-5 w-5 text-blue-600" />
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="p-1.5 sm:p-2 bg-blue-100 rounded-xl">
+                  <CreditCard className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-xs sm:text-sm text-muted-foreground">
                     Processing Fees
                   </p>
-                  <p className="text-2xl font-bold">${totalFees.toFixed(2)}</p>
+                  <p className="text-xl sm:text-2xl font-bold">
+                    ${totalFees.toFixed(2)}
+                  </p>
                 </div>
               </div>
               <div className="text-blue-600 flex items-center gap-1">
@@ -262,18 +266,18 @@ export function PaymentsFinance() {
           </CardContent>
         </Card>
 
-        <Card className="p-6">
+        <Card className="p-4 sm:p-6">
           <CardContent className="p-0">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-yellow-100 rounded-xl">
-                  <Clock className="h-5 w-5 text-yellow-600" />
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="p-1.5 sm:p-2 bg-yellow-100 rounded-xl">
+                  <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-600" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-xs sm:text-sm text-muted-foreground">
                     Pending Amount
                   </p>
-                  <p className="text-2xl font-bold">
+                  <p className="text-xl sm:text-2xl font-bold">
                     ${pendingAmount.toFixed(2)}
                   </p>
                 </div>
@@ -285,12 +289,12 @@ export function PaymentsFinance() {
           </CardContent>
         </Card>
 
-        <Card className="p-6">
+        <Card className="p-4 sm:p-6">
           <CardContent className="p-0">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-red-100 rounded-xl">
-                  <AlertTriangle className="h-5 w-5 text-red-600" />
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="p-1.5 sm:p-2 bg-red-100 rounded-xl">
+                  <AlertTriangle className="h-4 w-4 sm:h-5 sm:w-5 text-red-600" />
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">
@@ -309,7 +313,7 @@ export function PaymentsFinance() {
       </div>
 
       {/* Charts Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
         {/* Revenue Trend */}
         <Card className="p-6">
           <CardHeader className="p-0 pb-4">
@@ -425,96 +429,98 @@ export function PaymentsFinance() {
           <CardTitle>Recent Transactions</CardTitle>
         </CardHeader>
         <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Transaction ID</TableHead>
-                <TableHead>Customer</TableHead>
-                <TableHead>Salon</TableHead>
-                <TableHead>Service</TableHead>
-                <TableHead>Amount</TableHead>
-                <TableHead>Fee</TableHead>
-                <TableHead>Method</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Date & Time</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredTransactions.map((transaction) => (
-                <TableRow key={transaction.id}>
-                  <TableCell className="font-mono text-sm">
-                    {transaction.id}
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <Avatar className="h-8 w-8">
-                        <AvatarFallback>
-                          {transaction.customer
-                            .split(" ")
-                            .map((n) => n[0])
-                            .join("")}
-                        </AvatarFallback>
-                      </Avatar>
-                      <span className="font-medium">
-                        {transaction.customer}
-                      </span>
-                    </div>
-                  </TableCell>
-                  <TableCell className="font-medium">
-                    {transaction.salon}
-                  </TableCell>
-                  <TableCell className="text-muted-foreground">
-                    {transaction.service}
-                  </TableCell>
-                  <TableCell>
-                    <span className="font-semibold">
-                      ${transaction.amount.toFixed(2)}
-                    </span>
-                  </TableCell>
-                  <TableCell>
-                    <span className="text-muted-foreground">
-                      ${transaction.fee.toFixed(2)}
-                    </span>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      {getMethodIcon(transaction.method)}
-                      <span className="capitalize">
-                        {transaction.method.replace("_", " ")}
-                      </span>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge
-                      className={`rounded-full ${getStatusColor(
-                        transaction.status
-                      )}`}
-                      variant="secondary"
-                    >
-                      {transaction.status === "completed" && (
-                        <CheckCircle className="h-3 w-3 mr-1" />
-                      )}
-                      {transaction.status === "pending" && (
-                        <Clock className="h-3 w-3 mr-1" />
-                      )}
-                      {transaction.status === "failed" && (
-                        <AlertTriangle className="h-3 w-3 mr-1" />
-                      )}
-                      {transaction.status}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <div className="text-sm">
-                      <div>{transaction.date}</div>
-                      <div className="text-muted-foreground">
-                        {transaction.time}
-                      </div>
-                    </div>
-                  </TableCell>
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Transaction ID</TableHead>
+                  <TableHead>Customer</TableHead>
+                  <TableHead>Salon</TableHead>
+                  <TableHead>Service</TableHead>
+                  <TableHead>Amount</TableHead>
+                  <TableHead>Fee</TableHead>
+                  <TableHead>Method</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Date & Time</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {filteredTransactions.map((transaction) => (
+                  <TableRow key={transaction.id}>
+                    <TableCell className="font-mono text-sm">
+                      {transaction.id}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <Avatar className="h-8 w-8">
+                          <AvatarFallback>
+                            {transaction.customer
+                              .split(" ")
+                              .map((n) => n[0])
+                              .join("")}
+                          </AvatarFallback>
+                        </Avatar>
+                        <span className="font-medium">
+                          {transaction.customer}
+                        </span>
+                      </div>
+                    </TableCell>
+                    <TableCell className="font-medium">
+                      {transaction.salon}
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {transaction.service}
+                    </TableCell>
+                    <TableCell>
+                      <span className="font-semibold">
+                        ${transaction.amount.toFixed(2)}
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      <span className="text-muted-foreground">
+                        ${transaction.fee.toFixed(2)}
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        {getMethodIcon(transaction.method)}
+                        <span className="capitalize">
+                          {transaction.method.replace("_", " ")}
+                        </span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Badge
+                        className={`rounded-full ${getStatusColor(
+                          transaction.status
+                        )}`}
+                        variant="secondary"
+                      >
+                        {transaction.status === "completed" && (
+                          <CheckCircle className="h-3 w-3 mr-1" />
+                        )}
+                        {transaction.status === "pending" && (
+                          <Clock className="h-3 w-3 mr-1" />
+                        )}
+                        {transaction.status === "failed" && (
+                          <AlertTriangle className="h-3 w-3 mr-1" />
+                        )}
+                        {transaction.status}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <div className="text-sm">
+                        <div>{transaction.date}</div>
+                        <div className="text-muted-foreground">
+                          {transaction.time}
+                        </div>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
         </CardContent>
       </Card>
 

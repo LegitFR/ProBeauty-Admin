@@ -164,45 +164,51 @@ export function SalonManagement() {
     salonsData.length;
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-4 sm:space-y-6 p-4 sm:p-6 max-w-full overflow-x-hidden">
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold">Salon Management</h1>
-          <p className="text-muted-foreground mt-1">
+          <h1 className="text-2xl sm:text-3xl font-bold">Salon Management</h1>
+          <p className="text-sm sm:text-base text-muted-foreground mt-1">
             Manage and monitor your partner salons
           </p>
         </div>
-        <Button className="bg-primary hover:bg-primary/90 rounded-2xl">
-          Add New Salon
-        </Button>
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+          <Button className="bg-primary hover:bg-primary/90 rounded-2xl w-full sm:w-auto">
+            Add New Salon
+          </Button>
+        </div>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card className="p-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
+        <Card className="p-4 sm:p-6">
           <CardContent className="p-0">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-green-100 rounded-xl">
-                <Users className="h-5 w-5 text-green-600" />
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="p-1.5 sm:p-2 bg-green-100 rounded-xl">
+                <Users className="h-4 w-4 sm:h-5 sm:w-5 text-green-600" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Active Salons</p>
-                <p className="text-2xl font-bold">{activeCount}</p>
+                <p className="text-xs sm:text-sm text-muted-foreground">
+                  Active Salons
+                </p>
+                <p className="text-xl sm:text-2xl font-bold">{activeCount}</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="p-6">
+        <Card className="p-4 sm:p-6">
           <CardContent className="p-0">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-blue-100 rounded-xl">
-                <DollarSign className="h-5 w-5 text-blue-600" />
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="p-1.5 sm:p-2 bg-blue-100 rounded-xl">
+                <DollarSign className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Total Revenue</p>
-                <p className="text-2xl font-bold">
+                <p className="text-xs sm:text-sm text-muted-foreground">
+                  Total Revenue
+                </p>
+                <p className="text-xl sm:text-2xl font-bold">
                   ${(totalRevenue / 1000).toFixed(0)}K
                 </p>
               </div>
@@ -210,11 +216,11 @@ export function SalonManagement() {
           </CardContent>
         </Card>
 
-        <Card className="p-6">
+        <Card className="p-4 sm:p-6">
           <CardContent className="p-0">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-purple-100 rounded-xl">
-                <TrendingUp className="h-5 w-5 text-purple-600" />
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="p-1.5 sm:p-2 bg-purple-100 rounded-xl">
+                <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-purple-600" />
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">
@@ -228,15 +234,19 @@ export function SalonManagement() {
           </CardContent>
         </Card>
 
-        <Card className="p-6">
+        <Card className="p-4 sm:p-6">
           <CardContent className="p-0">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-yellow-100 rounded-xl">
-                <Star className="h-5 w-5 text-yellow-600" />
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="p-1.5 sm:p-2 bg-yellow-100 rounded-xl">
+                <Star className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-600" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Avg Rating</p>
-                <p className="text-2xl font-bold">{avgRating.toFixed(1)}</p>
+                <p className="text-xs sm:text-sm text-muted-foreground">
+                  Avg Rating
+                </p>
+                <p className="text-xl sm:text-2xl font-bold">
+                  {avgRating.toFixed(1)}
+                </p>
               </div>
             </div>
           </CardContent>
@@ -288,110 +298,112 @@ export function SalonManagement() {
 
       {/* Salons Table */}
       <Card>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Salon</TableHead>
-              <TableHead>Location</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Rating</TableHead>
-              <TableHead>Bookings</TableHead>
-              <TableHead>Revenue</TableHead>
-              <TableHead>Commission</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filteredSalons.map((salon) => (
-              <TableRow key={salon.id}>
-                <TableCell>
-                  <div className="flex items-center gap-3">
-                    <Avatar className="h-10 w-10">
-                      <AvatarImage src={salon.image} alt={salon.name} />
-                      <AvatarFallback>
-                        {salon.name
-                          .split(" ")
-                          .map((n) => n[0])
-                          .join("")}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <p className="font-medium">{salon.name}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {salon.owner}
-                      </p>
-                    </div>
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <div className="flex items-center gap-1">
-                    <MapPin className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm">{salon.location}</span>
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <Badge
-                    variant={
-                      salon.status === "active"
-                        ? "default"
-                        : salon.status === "pending"
-                        ? "secondary"
-                        : "destructive"
-                    }
-                    className="rounded-full"
-                  >
-                    {salon.status}
-                  </Badge>
-                </TableCell>
-                <TableCell>
-                  <div className="flex items-center gap-1">
-                    <Star className="h-4 w-4 text-yellow-500 fill-current" />
-                    <span>{salon.rating}</span>
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <div className="flex items-center gap-1">
-                    <Calendar className="h-4 w-4 text-muted-foreground" />
-                    <span>{salon.totalBookings.toLocaleString()}</span>
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <span className="font-medium">
-                    ${salon.revenue.toLocaleString()}
-                  </span>
-                </TableCell>
-                <TableCell>
-                  <span className="text-green-600 font-medium">
-                    ${salon.commission.toLocaleString()}
-                  </span>
-                </TableCell>
-                <TableCell className="text-right">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon" className="h-8 w-8">
-                        <MoreHorizontal className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem>
-                        <Eye className="mr-2 h-4 w-4" />
-                        View Details
-                      </DropdownMenuItem>
-                      <DropdownMenuItem>
-                        <Edit className="mr-2 h-4 w-4" />
-                        Edit Salon
-                      </DropdownMenuItem>
-                      <DropdownMenuItem className="text-destructive">
-                        <Trash2 className="mr-2 h-4 w-4" />
-                        Suspend
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </TableCell>
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Salon</TableHead>
+                <TableHead>Location</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Rating</TableHead>
+                <TableHead>Bookings</TableHead>
+                <TableHead>Revenue</TableHead>
+                <TableHead>Commission</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {filteredSalons.map((salon) => (
+                <TableRow key={salon.id}>
+                  <TableCell>
+                    <div className="flex items-center gap-3">
+                      <Avatar className="h-10 w-10">
+                        <AvatarImage src={salon.image} alt={salon.name} />
+                        <AvatarFallback>
+                          {salon.name
+                            .split(" ")
+                            .map((n) => n[0])
+                            .join("")}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <p className="font-medium">{salon.name}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {salon.owner}
+                        </p>
+                      </div>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-1">
+                      <MapPin className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-sm">{salon.location}</span>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <Badge
+                      variant={
+                        salon.status === "active"
+                          ? "default"
+                          : salon.status === "pending"
+                          ? "secondary"
+                          : "destructive"
+                      }
+                      className="rounded-full"
+                    >
+                      {salon.status}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-1">
+                      <Star className="h-4 w-4 text-yellow-500 fill-current" />
+                      <span>{salon.rating}</span>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-1">
+                      <Calendar className="h-4 w-4 text-muted-foreground" />
+                      <span>{salon.totalBookings.toLocaleString()}</span>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <span className="font-medium">
+                      ${salon.revenue.toLocaleString()}
+                    </span>
+                  </TableCell>
+                  <TableCell>
+                    <span className="text-green-600 font-medium">
+                      ${salon.commission.toLocaleString()}
+                    </span>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem>
+                          <Eye className="mr-2 h-4 w-4" />
+                          View Details
+                        </DropdownMenuItem>
+                        <DropdownMenuItem>
+                          <Edit className="mr-2 h-4 w-4" />
+                          Edit Salon
+                        </DropdownMenuItem>
+                        <DropdownMenuItem className="text-destructive">
+                          <Trash2 className="mr-2 h-4 w-4" />
+                          Suspend
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
       </Card>
 
       {/* Pagination */}

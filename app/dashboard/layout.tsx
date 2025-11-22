@@ -21,6 +21,11 @@ export default function DashboardLayout({
       setIsDark(true);
       document.documentElement.classList.add("dark");
     }
+
+    // Cleanup body overflow on unmount
+    return () => {
+      document.body.style.overflow = "";
+    };
   }, []);
 
   const toggleTheme = () => {
@@ -36,6 +41,12 @@ export default function DashboardLayout({
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
+    // Prevent body scroll when sidebar is open on mobile
+    if (!sidebarOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
   };
 
   const toggleSidebarCollapse = () => {
@@ -66,17 +77,20 @@ export default function DashboardLayout({
         {sidebarOpen && (
           <div
             className="fixed inset-0 z-30 bg-black/50 backdrop-blur-sm md:hidden"
-            onClick={() => setSidebarOpen(false)}
+            onClick={() => {
+              setSidebarOpen(false);
+              document.body.style.overflow = "";
+            }}
           />
         )}
 
         {/* Main Content */}
         <main
-          className={`flex-1 transition-all duration-300 ${
+          className={`flex-1 transition-all duration-300 w-full overflow-x-hidden ${
             sidebarCollapsed ? "md:ml-16" : "md:ml-64"
           }`}
         >
-          <div className="min-h-[calc(100vh-4rem)]">{children}</div>
+          <div className="min-h-[calc(100vh-4rem)] w-full">{children}</div>
         </main>
       </div>
     </div>

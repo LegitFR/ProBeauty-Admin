@@ -310,19 +310,19 @@ export function BookingManagement() {
   };
 
   return (
-    <div className="space-y-6 p-6">
-      <div className="flex justify-between items-center">
+    <div className="space-y-4 sm:space-y-6 p-4 sm:p-6 max-w-full overflow-x-hidden">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 min-w-full">
         <div>
-          <h1 className="text-3xl font-bold flex items-center gap-3">
+          <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-3">
             <Calendar className="h-8 w-8 text-primary" />
             Booking Management
           </h1>
-          <p className="text-muted-foreground mt-1">
+          <p className="text-sm sm:text-base text-muted-foreground mt-1">
             Manage appointments, schedules, and booking analytics
           </p>
         </div>
-        <div className="flex items-center gap-3">
-          <Button variant="outline" className="rounded-2xl">
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+          <Button variant="outline" className="rounded-2xl w-full sm:w-auto">
             <Download className="h-4 w-4 mr-2" />
             Export
           </Button>
@@ -333,7 +333,7 @@ export function BookingManagement() {
                 New Booking
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-2xl">
+            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>Create New Booking</DialogTitle>
               </DialogHeader>
@@ -430,63 +430,73 @@ export function BookingManagement() {
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card className="p-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
+        <Card className="p-4 sm:p-6">
           <CardContent className="p-0">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-blue-100 rounded-xl">
-                <Calendar className="h-5 w-5 text-blue-600" />
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="p-1.5 sm:p-2 bg-blue-100 rounded-xl">
+                <Calendar className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-xs sm:text-sm text-muted-foreground">
                   Today's Bookings
                 </p>
-                <p className="text-2xl font-bold">{todaysBookings.length}</p>
+                <p className="text-xl sm:text-2xl font-bold">
+                  {todaysBookings.length}
+                </p>
                 <p className="text-xs text-green-600">+8% from yesterday</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="p-6">
+        <Card className="p-4 sm:p-6">
           <CardContent className="p-0">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-green-100 rounded-xl">
-                <CheckCircle className="h-5 w-5 text-green-600" />
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="p-1.5 sm:p-2 bg-green-100 rounded-xl">
+                <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 text-green-600" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Completed</p>
-                <p className="text-2xl font-bold">{completedToday}</p>
+                <p className="text-xs sm:text-sm text-muted-foreground">
+                  Completed
+                </p>
+                <p className="text-xl sm:text-2xl font-bold">
+                  {completedToday}
+                </p>
                 <p className="text-xs text-green-600">94% completion rate</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="p-6">
+        <Card className="p-4 sm:p-6">
           <CardContent className="p-0">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-yellow-100 rounded-xl">
-                <Clock className="h-5 w-5 text-yellow-600" />
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="p-1.5 sm:p-2 bg-orange-100 rounded-xl">
+                <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-orange-600" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Pending</p>
-                <p className="text-2xl font-bold">{pendingToday}</p>
+                <p className="text-xs sm:text-sm text-muted-foreground">
+                  Pending
+                </p>
+                <p className="text-xl sm:text-2xl font-bold">{pendingToday}</p>
                 <p className="text-xs text-yellow-600">Awaiting confirmation</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="p-6">
+        <Card className="p-4 sm:p-6">
           <CardContent className="p-0">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-primary/10 rounded-xl">
-                <DollarSign className="h-5 w-5 text-primary" />
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="p-1.5 sm:p-2 bg-purple-100 rounded-xl">
+                <DollarSign className="h-4 w-4 sm:h-5 sm:w-5 text-purple-600" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Today's Revenue</p>
-                <p className="text-2xl font-bold">$1,247</p>
+                <p className="text-xs sm:text-sm text-muted-foreground">
+                  Today's Revenue
+                </p>
+                <p className="text-xl sm:text-2xl font-bold">$1,247</p>
                 <p className="text-xs text-green-600">+12% from yesterday</p>
               </div>
             </div>
@@ -499,44 +509,56 @@ export function BookingManagement() {
         onValueChange={setActiveTab}
         className="space-y-6"
       >
-        <TabsList className="grid w-full grid-cols-3 rounded-2xl">
-          <TabsTrigger value="calendar" className="rounded-xl">
-            <Calendar className="h-4 w-4 mr-2" />
-            Calendar View
+        <TabsList className="grid w-full grid-cols-3 rounded-2xl p-1">
+          <TabsTrigger
+            value="calendar"
+            className="rounded-xl text-xs sm:text-sm"
+          >
+            <Calendar className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
+            <span className="hidden sm:inline">Calendar View</span>
+            <span className="sm:hidden">Calendar</span>
           </TabsTrigger>
-          <TabsTrigger value="bookings" className="rounded-xl">
-            <Users className="h-4 w-4 mr-2" />
-            All Bookings
+          <TabsTrigger
+            value="bookings"
+            className="rounded-xl text-xs sm:text-sm"
+          >
+            <Users className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
+            <span className="hidden sm:inline">All Bookings</span>
+            <span className="sm:hidden">Bookings</span>
           </TabsTrigger>
-          <TabsTrigger value="analytics" className="rounded-xl">
-            <TrendingUp className="h-4 w-4 mr-2" />
-            Analytics
+          <TabsTrigger
+            value="analytics"
+            className="rounded-xl text-xs sm:text-sm"
+          >
+            <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
+            <span className="hidden sm:inline">Analytics</span>
+            <span className="sm:hidden">Stats</span>
           </TabsTrigger>
         </TabsList>
 
         <TabsContent value="calendar" className="space-y-6">
           {/* Calendar Header */}
           <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle className="flex items-center gap-3">
-                  <Calendar className="h-5 w-5" />
+            <CardHeader className="p-3 sm:p-6">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
+                <CardTitle className="flex items-center gap-2 sm:gap-3 text-base sm:text-lg">
+                  <Calendar className="h-4 w-4 sm:h-5 sm:w-5" />
                   {selectedDate.toLocaleDateString("en-US", {
                     month: "long",
                     year: "numeric",
                   })}
                 </CardTitle>
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center border rounded-xl">
+                <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
+                  <div className="flex items-center border rounded-xl overflow-hidden">
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={() => setViewMode("month")}
-                      className={
+                      className={`text-xs sm:text-sm h-7 sm:h-9 px-2 sm:px-3 ${
                         viewMode === "month"
                           ? "bg-primary text-primary-foreground"
                           : ""
-                      }
+                      }`}
                     >
                       Month
                     </Button>
@@ -544,11 +566,11 @@ export function BookingManagement() {
                       variant="ghost"
                       size="sm"
                       onClick={() => setViewMode("week")}
-                      className={
+                      className={`text-xs sm:text-sm h-7 sm:h-9 px-2 sm:px-3 ${
                         viewMode === "week"
                           ? "bg-primary text-primary-foreground"
                           : ""
-                      }
+                      }`}
                     >
                       Week
                     </Button>
@@ -556,11 +578,11 @@ export function BookingManagement() {
                       variant="ghost"
                       size="sm"
                       onClick={() => setViewMode("day")}
-                      className={
+                      className={`text-xs sm:text-sm h-7 sm:h-9 px-2 sm:px-3 ${
                         viewMode === "day"
                           ? "bg-primary text-primary-foreground"
                           : ""
-                      }
+                      }`}
                     >
                       Day
                     </Button>
@@ -570,13 +592,15 @@ export function BookingManagement() {
                       variant="outline"
                       size="sm"
                       onClick={() => navigateMonth("prev")}
+                      className="h-7 w-7 sm:h-9 sm:w-9 p-0"
                     >
-                      <ChevronLeft className="h-4 w-4" />
+                      <ChevronLeft className="h-3 w-3 sm:h-4 sm:w-4" />
                     </Button>
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => setSelectedDate(new Date())}
+                      className="h-7 sm:h-9 px-2 sm:px-3 text-xs sm:text-sm"
                     >
                       Today
                     </Button>
@@ -584,71 +608,84 @@ export function BookingManagement() {
                       variant="outline"
                       size="sm"
                       onClick={() => navigateMonth("next")}
+                      className="h-7 w-7 sm:h-9 sm:w-9 p-0"
                     >
-                      <ChevronRight className="h-4 w-4" />
+                      <ChevronRight className="h-3 w-3 sm:h-4 sm:w-4" />
                     </Button>
                   </div>
                 </div>
               </div>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-3 sm:p-6">
               {/* Calendar Grid */}
-              <div className="grid grid-cols-7 gap-1 mb-4">
+              <div className="grid grid-cols-7 gap-0.5 sm:gap-1 mb-2 sm:mb-4">
                 {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map(
                   (day) => (
                     <div
                       key={day}
-                      className="p-3 text-center font-medium text-muted-foreground"
+                      className="p-1 sm:p-3 text-center font-medium text-muted-foreground text-xs sm:text-sm"
                     >
-                      {day}
+                      <span className="hidden sm:inline">{day}</span>
+                      <span className="sm:hidden">{day.charAt(0)}</span>
                     </div>
                   )
                 )}
               </div>
 
-              <div className="grid grid-cols-7 gap-1">
+              <div className="grid grid-cols-7 gap-0.5 sm:gap-1">
                 {calendarDays.map((day, index) => (
                   <div
                     key={index}
-                    className={`min-h-[120px] p-2 border rounded-lg cursor-pointer hover:bg-muted/50 transition-colors ${
+                    className={`min-h-[60px] sm:min-h-[90px] md:min-h-[120px] p-1 sm:p-2 border rounded cursor-pointer hover:bg-muted/50 transition-colors ${
                       day.isToday ? "bg-primary/10 border-primary" : ""
                     } ${day.isOtherMonth ? "opacity-50" : ""}`}
                   >
-                    <div className="flex justify-between items-center mb-1">
+                    <div className="flex justify-between items-center mb-0.5 sm:mb-1">
                       <span
-                        className={`text-sm font-medium ${
-                          day.isToday ? "text-primary" : ""
+                        className={`text-xs sm:text-sm font-medium ${
+                          day.isToday ? "text-primary font-bold" : ""
                         }`}
                       >
                         {day.date}
                       </span>
                       {day.bookings.length > 0 && (
-                        <Badge variant="secondary" className="text-xs h-5 px-1">
+                        <Badge
+                          variant="secondary"
+                          className="text-[10px] sm:text-xs h-4 sm:h-5 px-1"
+                        >
                           {day.bookings.length}
                         </Badge>
                       )}
                     </div>
 
-                    <div className="space-y-1">
-                      {day.bookings.slice(0, 3).map((booking, idx) => (
-                        <div
-                          key={idx}
-                          className={`text-xs p-1 rounded text-white truncate ${
-                            booking.status === "confirmed"
-                              ? "bg-blue-500"
-                              : booking.status === "completed"
-                              ? "bg-green-500"
-                              : booking.status === "pending"
-                              ? "bg-yellow-500"
-                              : "bg-red-500"
-                          }`}
-                        >
-                          {booking.time} - {booking.customerName}
-                        </div>
-                      ))}
-                      {day.bookings.length > 3 && (
-                        <div className="text-xs text-muted-foreground">
-                          +{day.bookings.length - 3} more
+                    <div className="space-y-0.5 sm:space-y-1">
+                      {day.bookings
+                        .slice(0, window.innerWidth < 640 ? 1 : 3)
+                        .map((booking, idx) => (
+                          <div
+                            key={idx}
+                            className={`text-[10px] sm:text-xs p-0.5 sm:p-1 rounded text-white truncate ${
+                              booking.status === "confirmed"
+                                ? "bg-blue-500"
+                                : booking.status === "completed"
+                                ? "bg-green-500"
+                                : booking.status === "pending"
+                                ? "bg-yellow-500"
+                                : "bg-red-500"
+                            }`}
+                          >
+                            <span className="hidden sm:inline">
+                              {booking.time} -{" "}
+                            </span>
+                            {booking.customerName.split(" ")[0]}
+                          </div>
+                        ))}
+                      {day.bookings.length >
+                        (window.innerWidth < 640 ? 1 : 3) && (
+                        <div className="text-[10px] sm:text-xs text-muted-foreground">
+                          +
+                          {day.bookings.length -
+                            (window.innerWidth < 640 ? 1 : 3)}
                         </div>
                       )}
                     </div>
@@ -662,21 +699,21 @@ export function BookingManagement() {
         <TabsContent value="bookings" className="space-y-6">
           {/* Search and Filters */}
           <Card>
-            <CardContent className="p-4">
-              <div className="flex flex-col md:flex-row gap-4">
+            <CardContent className="p-3 sm:p-4">
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
                 <div className="relative flex-1">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
-                    placeholder="Search bookings by customer, service, or salon..."
+                    placeholder="Search bookings..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10"
+                    className="pl-10 h-9 sm:h-10 text-sm"
                   />
                 </div>
-                <div className="flex items-center gap-3">
-                  <Filter className="h-4 w-4 text-muted-foreground" />
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <Filter className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                   <Select value={statusFilter} onValueChange={setStatusFilter}>
-                    <SelectTrigger className="w-48">
+                    <SelectTrigger className="w-full sm:w-40 h-9 sm:h-10 text-sm">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -698,37 +735,39 @@ export function BookingManagement() {
 
           {/* Bookings List */}
           <Card>
-            <CardHeader>
-              <CardTitle>All Bookings ({filteredBookings.length})</CardTitle>
+            <CardHeader className="p-3 sm:p-6">
+              <CardTitle className="text-base sm:text-lg">
+                All Bookings ({filteredBookings.length})
+              </CardTitle>
             </CardHeader>
             <CardContent className="p-0">
-              <ScrollArea className="h-[600px]">
-                <div className="space-y-1 p-6">
+              <ScrollArea className="h-[400px] sm:h-[500px] lg:h-[600px]">
+                <div className="space-y-1 p-3 sm:p-6">
                   {filteredBookings.map((booking, index) => {
                     const StatusIcon = getStatusIcon(booking.status);
                     return (
                       <div key={booking.id}>
-                        <div className="flex items-center gap-4 p-4 rounded-xl hover:bg-muted/50 transition-colors">
+                        <div className="flex items-start gap-2 sm:gap-4 p-2 sm:p-4 rounded-xl hover:bg-muted/50 transition-colors">
                           <div
-                            className={`p-2 rounded-xl ${getStatusColor(
+                            className={`p-1.5 sm:p-2 rounded-xl flex-shrink-0 ${getStatusColor(
                               booking.status
                             )
                               .replace("text-", "text-")
                               .replace("bg-", "bg-")}`}
                           >
-                            <StatusIcon className="h-5 w-5" />
+                            <StatusIcon className="h-4 w-4 sm:h-5 sm:w-5" />
                           </div>
 
                           <div className="flex-1 min-w-0">
                             <div className="flex items-start justify-between gap-2">
-                              <div className="flex-1">
-                                <div className="flex items-center gap-3 mb-1">
-                                  <h4 className="font-medium">
+                              <div className="flex-1 min-w-0">
+                                <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 mb-2">
+                                  <h4 className="font-medium text-sm sm:text-base truncate">
                                     {booking.customerName}
                                   </h4>
                                   <Badge
                                     variant="outline"
-                                    className={`text-xs rounded-full ${getStatusColor(
+                                    className={`text-[10px] sm:text-xs rounded-full w-fit ${getStatusColor(
                                       booking.status
                                     )}`}
                                   >
@@ -736,7 +775,7 @@ export function BookingManagement() {
                                   </Badge>
                                 </div>
 
-                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-muted-foreground">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 text-xs sm:text-sm text-muted-foreground">
                                   <div className="flex items-center gap-1">
                                     <Calendar className="h-3 w-3" />
                                     {booking.date} at {booking.time}
@@ -755,23 +794,25 @@ export function BookingManagement() {
                                   </div>
                                 </div>
 
-                                <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
+                                <div className="flex flex-wrap items-center gap-2 sm:gap-4 mt-2 text-xs sm:text-sm text-muted-foreground">
                                   <span className="flex items-center gap-1">
                                     <Clock className="h-3 w-3" />
                                     {booking.duration} min
                                   </span>
-                                  <span className="flex items-center gap-1">
-                                    <User className="h-3 w-3" />
-                                    {booking.stylist}
+                                  <span className="flex items-center gap-1 truncate">
+                                    <User className="h-3 w-3 flex-shrink-0" />
+                                    <span className="truncate">
+                                      {booking.stylist}
+                                    </span>
                                   </span>
-                                  <span className="flex items-center gap-1">
+                                  <span className="hidden sm:flex items-center gap-1">
                                     <Phone className="h-3 w-3" />
                                     {booking.customerPhone}
                                   </span>
                                 </div>
 
                                 {booking.notes && (
-                                  <p className="text-sm text-muted-foreground mt-2 p-2 bg-muted/30 rounded-lg">
+                                  <p className="text-xs sm:text-sm text-muted-foreground mt-2 p-2 bg-muted/30 rounded-lg line-clamp-2">
                                     {booking.notes}
                                   </p>
                                 )}
@@ -824,7 +865,7 @@ export function BookingManagement() {
         </TabsContent>
 
         <TabsContent value="analytics" className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
             <Card>
               <CardHeader>
                 <CardTitle>Booking Trends</CardTitle>

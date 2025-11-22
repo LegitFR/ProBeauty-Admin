@@ -40,28 +40,28 @@ export function DashboardHeader({
 }: DashboardHeaderProps) {
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="flex h-16 items-center px-6">
+    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
+      <div className="flex h-16 items-center px-3 sm:px-4 md:px-6">
         <Button
           variant="ghost"
           size="icon"
-          className="md:hidden"
+          className="md:hidden flex-shrink-0"
           onClick={toggleSidebar}
         >
           <Menu className="h-5 w-5" />
         </Button>
 
-        <div className="flex-1 flex items-center gap-4 ml-4 md:ml-0">
+        <div className="flex-1 flex items-center gap-2 sm:gap-4 ml-2 sm:ml-4 md:ml-0 min-w-0">
           <div className="relative max-w-md w-full">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search salons, customers, bookings..."
-              className="pl-10 bg-muted/50"
+              placeholder="Search..."
+              className="pl-10 bg-muted/50 text-sm"
             />
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-1.5 sm:gap-2 md:gap-3 flex-shrink-0">
           <Button
             variant="ghost"
             size="icon"

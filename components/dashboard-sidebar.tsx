@@ -117,22 +117,25 @@ export function DashboardSidebar({
   return (
     <aside
       className={cn(
-        "fixed left-0 top-16 z-40 h-[calc(100vh-4rem)] bg-background border-r transition-all duration-300",
+        "fixed left-0 top-16 z-40 bg-background border-r transition-all duration-300 overflow-y-auto overscroll-contain min-h-screen",
         isCollapsed ? "w-16" : "w-64",
         className
       )}
+      style={{ WebkitOverflowScrolling: "touch" } as React.CSSProperties}
     >
-      <div className="flex flex-col h-full">
+      <div className="flex flex-col min-h-full pb-6">
         {/* Logo and Brand */}
-        <div className="flex items-center justify-between px-6 py-5 border-b flex-shrink-0">
+        <div className="flex items-center justify-between px-3 sm:px-5 py-2 sm:py-6 md:mt-1 border-b">
           {!isCollapsed && (
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
-                <Scissors className="w-5 h-5 text-primary-foreground" />
+            <div className="flex items-center gap-1.5 sm:gap-3 min-w-0 flex-1">
+              <div className="w-7 h-7 sm:w-10 sm:h-10 bg-primary rounded-lg flex items-center justify-center flex-shrink-0">
+                <Scissors className="w-3.5 h-3.5 sm:w-5 sm:h-5 text-primary-foreground" />
               </div>
-              <div className="flex flex-col">
-                <span className="font-semibold text-foreground">ProBeauty</span>
-                <span className="text-xs text-muted-foreground">
+              <div className="flex flex-col min-w-0">
+                <span className="font-semibold text-sm sm:text-base text-foreground truncate">
+                  ProBeauty
+                </span>
+                <span className="text-xs text-muted-foreground truncate">
                   Admin Panel
                 </span>
               </div>
@@ -142,7 +145,7 @@ export function DashboardSidebar({
             variant="ghost"
             size="icon"
             onClick={onToggleCollapse}
-            className="h-8 w-8 rounded-2xl hidden md:flex"
+            className="h-8 w-8 rounded-2xl hidden md:flex flex-shrink-0"
           >
             {isCollapsed ? (
               <ChevronRight className="h-4 w-4" />
@@ -152,67 +155,65 @@ export function DashboardSidebar({
           </Button>
         </div>
 
-        {/* Navigation Items - Scrollable Area */}
-        <div className="flex-1 overflow-y-auto min-h-0">
-          <nav className="px-4 pt-6 pb-4 space-y-2">
-            {sidebarItems.map((item) => {
-              const isActive =
-                pathname === item.href ||
-                (item.href === "/dashboard" && pathname === "/dashboard");
-              return (
-                <Link key={item.id} href={item.href}>
-                  <Button
-                    variant={isActive ? "default" : "ghost"}
+        {/* Navigation Items */}
+        <nav className="flex flex-col justify-center px-2 sm:px-3 py-2 sm:py-3 space-y-0.5 sm:space-y-1 space-y-2">
+          {sidebarItems.map((item) => {
+            const isActive =
+              pathname === item.href ||
+              (item.href === "/dashboard" && pathname === "/dashboard");
+            return (
+              <Link key={item.id} href={item.href}>
+                <Button
+                  variant={isActive ? "default" : "ghost"}
+                  className={cn(
+                    "w-full justify-start rounded-lg transition-all duration-200 h-8 sm:h-10",
+                    isCollapsed ? "px-2" : "px-2 sm:px-3 py-1.5 sm:py-2",
+                    isActive
+                      ? "bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm"
+                      : "hover:bg-accent text-foreground"
+                  )}
+                >
+                  <item.icon
                     className={cn(
-                      "w-full justify-start rounded-xl transition-all duration-200 h-12",
-                      isCollapsed ? "px-3" : "px-4 py-3",
-                      isActive
-                        ? "bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm"
-                        : "hover:bg-accent text-foreground"
+                      "h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0",
+                      isCollapsed ? "" : "mr-2 sm:mr-3"
                     )}
-                  >
-                    <item.icon
-                      className={cn(
-                        "h-5 w-5 shrink-0",
-                        isCollapsed ? "" : "mr-3.5"
+                  />
+                  {!isCollapsed && (
+                    <>
+                      <span className="flex-1 text-left text-xs sm:text-sm font-medium">
+                        {item.label}
+                      </span>
+                      {item.badge && (
+                        <Badge
+                          variant={isActive ? "secondary" : "default"}
+                          className="ml-auto rounded-full px-1.5 sm:px-2.5 py-0 sm:py-0.5 text-xs"
+                        >
+                          {item.badge}
+                        </Badge>
                       )}
-                    />
-                    {!isCollapsed && (
-                      <>
-                        <span className="flex-1 text-left text-sm font-medium">
-                          {item.label}
-                        </span>
-                        {item.badge && (
-                          <Badge
-                            variant={isActive ? "secondary" : "default"}
-                            className="ml-auto rounded-full px-2.5 py-0.5"
-                          >
-                            {item.badge}
-                          </Badge>
-                        )}
-                      </>
-                    )}
-                  </Button>
-                </Link>
-              );
-            })}
-          </nav>
+                    </>
+                  )}
+                </Button>
+              </Link>
+            );
+          })}
+        </nav>
 
-          {/* User Role Indicator */}
-          {!isCollapsed && (
-            <div className="mx-4 mb-6 mt-4 border-t pt-4">
-              <div className="bg-primary/10 rounded-xl p-4">
-                <div className="flex items-center gap-3 mb-2">
-                  <Shield className="h-4 w-4 text-primary" />
-                  <span className="text-sm font-semibold">Super Admin</span>
-                </div>
-                <p className="text-xs text-muted-foreground leading-relaxed">
-                  Full system access with all permissions
-                </p>
+        {/* User Role Indicator */}
+        {!isCollapsed && (
+          <div className="mx-2 sm:mx-3 mt-2 sm:mt-3 mb-2 border-t pt-2 sm:pt-3">
+            <div className="bg-primary/10 rounded-lg p-2 sm:p-3">
+              <div className="flex items-center gap-1.5 sm:gap-2 mb-1">
+                <Shield className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-primary" />
+                <span className="text-xs font-semibold">Super Admin</span>
               </div>
+              <p className="text-xs text-muted-foreground leading-tight sm:leading-snug">
+                Full system access with all permissions
+              </p>
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </aside>
   );

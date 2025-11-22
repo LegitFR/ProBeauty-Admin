@@ -478,19 +478,19 @@ export function DisputeManagement() {
   const customerSatisfactionAvg = 4.3;
 
   return (
-    <div className="space-y-6 p-6">
-      <div className="flex justify-between items-center">
+    <div className="space-y-4 sm:space-y-6 p-4 sm:p-6 max-w-full overflow-x-hidden">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold flex items-center gap-3">
+          <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-3">
             <AlertTriangle className="h-8 w-8 text-primary" />
             Dispute Management
           </h1>
-          <p className="text-muted-foreground mt-1">
+          <p className="text-sm sm:text-base text-muted-foreground mt-1">
             Handle customer disputes, complaints, and resolution tracking
           </p>
         </div>
-        <div className="flex items-center gap-3">
-          <Button variant="outline" className="rounded-2xl">
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+          <Button variant="outline" className="rounded-2xl w-full sm:w-auto">
             <Download className="h-4 w-4 mr-2" />
             Export Report
           </Button>
@@ -501,7 +501,7 @@ export function DisputeManagement() {
                 New Dispute
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-2xl">
+            <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>Create New Dispute</DialogTitle>
               </DialogHeader>
@@ -602,61 +602,73 @@ export function DisputeManagement() {
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card className="p-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
+        <Card className="p-4 sm:p-6">
           <CardContent className="p-0">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-blue-100 rounded-xl">
-                <MessageSquare className="h-5 w-5 text-blue-600" />
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="p-1.5 sm:p-2 bg-blue-100 rounded-xl">
+                <MessageSquare className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Total Disputes</p>
-                <p className="text-2xl font-bold">{totalDisputes}</p>
+                <p className="text-xs sm:text-sm text-muted-foreground">
+                  Total Disputes
+                </p>
+                <p className="text-xl sm:text-2xl font-bold">{totalDisputes}</p>
                 <p className="text-xs text-blue-600">All time</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="p-6">
+        <Card className="p-4 sm:p-6">
           <CardContent className="p-0">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-orange-100 rounded-xl">
-                <Clock className="h-5 w-5 text-orange-600" />
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="p-1.5 sm:p-2 bg-orange-100 rounded-xl">
+                <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-orange-600" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Open Disputes</p>
-                <p className="text-2xl font-bold">{openDisputes}</p>
+                <p className="text-xs sm:text-sm text-muted-foreground">
+                  Open Disputes
+                </p>
+                <p className="text-xl sm:text-2xl font-bold">{openDisputes}</p>
                 <p className="text-xs text-orange-600">Needs attention</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="p-6">
+        <Card className="p-4 sm:p-6">
           <CardContent className="p-0">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-green-100 rounded-xl">
-                <CheckCircle className="h-5 w-5 text-green-600" />
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="p-1.5 sm:p-2 bg-green-100 rounded-xl">
+                <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 text-green-600" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Resolved</p>
-                <p className="text-2xl font-bold">{resolvedDisputes}</p>
+                <p className="text-xs sm:text-sm text-muted-foreground">
+                  Resolved
+                </p>
+                <p className="text-xl sm:text-2xl font-bold">
+                  {resolvedDisputes}
+                </p>
                 <p className="text-xs text-green-600">This month</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="p-6">
+        <Card className="p-4 sm:p-6">
           <CardContent className="p-0">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-primary/10 rounded-xl">
-                <Star className="h-5 w-5 text-primary" />
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="p-1.5 sm:p-2 bg-primary/10 rounded-xl">
+                <Star className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Avg. Resolution</p>
-                <p className="text-2xl font-bold">{avgResolutionTime}d</p>
+                <p className="text-xs sm:text-sm text-muted-foreground">
+                  Avg. Resolution
+                </p>
+                <p className="text-xl sm:text-2xl font-bold">
+                  {avgResolutionTime}d
+                </p>
                 <p className="text-xs text-green-600">-0.5d from last month</p>
               </div>
             </div>
@@ -669,44 +681,56 @@ export function DisputeManagement() {
         onValueChange={setActiveTab}
         className="space-y-6"
       >
-        <TabsList className="grid w-full grid-cols-4 rounded-2xl">
-          <TabsTrigger value="disputes" className="rounded-xl">
-            <MessageSquare className="h-4 w-4 mr-2" />
-            All Disputes
+        <TabsList className="grid w-full grid-cols-4 rounded-2xl p-1">
+          <TabsTrigger
+            value="disputes"
+            className="rounded-xl text-xs sm:text-sm px-2 sm:px-3"
+          >
+            <MessageSquare className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
+            <span className="hidden sm:inline">All </span>Disputes
           </TabsTrigger>
-          <TabsTrigger value="agents" className="rounded-xl">
-            <Users className="h-4 w-4 mr-2" />
-            Agents
+          <TabsTrigger
+            value="agents"
+            className="rounded-xl text-xs sm:text-sm px-2 sm:px-3"
+          >
+            <Users className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
+            <span className="hidden xs:inline">Agents</span>
           </TabsTrigger>
-          <TabsTrigger value="analytics" className="rounded-xl">
-            <BarChart3 className="h-4 w-4 mr-2" />
-            Analytics
+          <TabsTrigger
+            value="analytics"
+            className="rounded-xl text-xs sm:text-sm px-2 sm:px-3"
+          >
+            <BarChart3 className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
+            <span className="hidden xs:inline">Analytics</span>
           </TabsTrigger>
-          <TabsTrigger value="settings" className="rounded-xl">
-            <Tag className="h-4 w-4 mr-2" />
-            Settings
+          <TabsTrigger
+            value="settings"
+            className="rounded-xl text-xs sm:text-sm px-2 sm:px-3"
+          >
+            <Tag className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
+            <span className="hidden xs:inline">Settings</span>
           </TabsTrigger>
         </TabsList>
 
         <TabsContent value="disputes" className="space-y-6">
           {/* Search and Filters */}
           <Card>
-            <CardContent className="p-4">
-              <div className="flex flex-col md:flex-row gap-4">
+            <CardContent className="p-3 sm:p-4">
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
                 <div className="relative flex-1">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
-                    placeholder="Search disputes by subject, customer, or ticket number..."
+                    placeholder="Search disputes..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10"
+                    className="pl-10 h-9 sm:h-10 text-sm"
                   />
                 </div>
-                <div className="flex items-center gap-3">
-                  <Filter className="h-4 w-4 text-muted-foreground" />
+                <div className="flex items-center gap-2 sm:gap-3 overflow-x-auto">
+                  <Filter className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                   <Select value={statusFilter} onValueChange={setStatusFilter}>
-                    <SelectTrigger className="w-48">
-                      <SelectValue placeholder="All Status" />
+                    <SelectTrigger className="w-32 sm:w-40 h-9 sm:h-10 text-xs sm:text-sm">
+                      <SelectValue placeholder="Status" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">All Status</SelectItem>
@@ -724,8 +748,8 @@ export function DisputeManagement() {
                     value={priorityFilter}
                     onValueChange={setPriorityFilter}
                   >
-                    <SelectTrigger className="w-48">
-                      <SelectValue placeholder="All Priority" />
+                    <SelectTrigger className="w-28 sm:w-36 h-9 sm:h-10 text-xs sm:text-sm">
+                      <SelectValue placeholder="Priority" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">All Priority</SelectItem>
@@ -742,19 +766,21 @@ export function DisputeManagement() {
 
           {/* Disputes List */}
           <Card>
-            <CardHeader>
-              <CardTitle>Disputes ({filteredDisputes.length})</CardTitle>
+            <CardHeader className="p-3 sm:p-6">
+              <CardTitle className="text-base sm:text-lg">
+                Disputes ({filteredDisputes.length})
+              </CardTitle>
             </CardHeader>
             <CardContent className="p-0">
-              <ScrollArea className="h-[600px]">
-                <div className="space-y-1 p-6">
+              <ScrollArea className="h-[400px] sm:h-[500px] lg:h-[600px]">
+                <div className="space-y-1 p-3 sm:p-6">
                   {filteredDisputes.map((dispute, index) => {
                     const CategoryIcon = getCategoryIcon(dispute.category);
                     return (
                       <div key={dispute.id}>
-                        <div className="flex items-start gap-4 p-4 rounded-xl hover:bg-muted/50 transition-colors">
+                        <div className="flex items-start gap-2 sm:gap-4 p-2 sm:p-4 rounded-xl hover:bg-muted/50 transition-colors">
                           <div
-                            className={`p-2 rounded-xl ${
+                            className={`p-1.5 sm:p-2 rounded-xl flex-shrink-0 ${
                               dispute.priority === "urgent"
                                 ? "bg-red-100 text-red-600"
                                 : dispute.priority === "high"
@@ -764,25 +790,25 @@ export function DisputeManagement() {
                                 : "bg-green-100 text-green-600"
                             }`}
                           >
-                            <CategoryIcon className="h-5 w-5" />
+                            <CategoryIcon className="h-4 w-4 sm:h-5 sm:w-5" />
                           </div>
 
                           <div className="flex-1 min-w-0">
                             <div className="flex items-start justify-between gap-2">
-                              <div className="flex-1">
-                                <div className="flex items-center gap-3 mb-2">
-                                  <h4 className="font-medium">
+                              <div className="flex-1 min-w-0">
+                                <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-2">
+                                  <h4 className="font-medium text-xs sm:text-sm">
                                     {dispute.ticketNumber}
                                   </h4>
                                   <Badge
-                                    className={`text-xs rounded-full ${getStatusColor(
+                                    className={`text-[10px] sm:text-xs rounded-full ${getStatusColor(
                                       dispute.status
                                     )}`}
                                   >
                                     {dispute.status.replace("_", " ")}
                                   </Badge>
                                   <Badge
-                                    className={`text-xs rounded-full ${getPriorityColor(
+                                    className={`text-[10px] sm:text-xs rounded-full ${getPriorityColor(
                                       dispute.priority
                                     )}`}
                                   >
@@ -790,40 +816,40 @@ export function DisputeManagement() {
                                   </Badge>
                                 </div>
 
-                                <h5 className="font-semibold mb-1">
+                                <h5 className="font-semibold text-sm sm:text-base mb-1 line-clamp-1">
                                   {dispute.subject}
                                 </h5>
-                                <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
+                                <p className="text-xs sm:text-sm text-muted-foreground mb-2 sm:mb-3 line-clamp-2">
                                   {dispute.description}
                                 </p>
 
-                                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm">
-                                  <div>
-                                    <p className="text-muted-foreground">
+                                <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 text-xs sm:text-sm">
+                                  <div className="min-w-0 overflow-hidden">
+                                    <p className="text-muted-foreground text-xs">
                                       Customer
                                     </p>
-                                    <p className="font-medium">
+                                    <p className="font-medium truncate">
                                       {dispute.customerName}
                                     </p>
-                                    <p className="text-muted-foreground">
+                                    <p className="text-muted-foreground text-xs truncate break-all hidden sm:block">
                                       {dispute.customerEmail}
                                     </p>
                                   </div>
 
-                                  <div>
-                                    <p className="text-muted-foreground">
-                                      Assigned To
+                                  <div className="min-w-0 overflow-hidden">
+                                    <p className="text-muted-foreground text-xs">
+                                      Assigned
                                     </p>
-                                    <p className="font-medium">
+                                    <p className="font-medium truncate">
                                       {dispute.assignedTo}
                                     </p>
-                                    <p className="text-muted-foreground">
+                                    <p className="text-muted-foreground text-xs truncate break-all hidden sm:block">
                                       {dispute.salon}
                                     </p>
                                   </div>
 
-                                  <div>
-                                    <p className="text-muted-foreground">
+                                  <div className="min-w-0">
+                                    <p className="text-muted-foreground text-xs">
                                       Created
                                     </p>
                                     <p className="font-medium">

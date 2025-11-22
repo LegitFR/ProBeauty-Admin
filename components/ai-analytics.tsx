@@ -127,24 +127,24 @@ const mlInsights = [
 
 export function AIAnalytics() {
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-4 sm:space-y-6 p-4 sm:p-6 max-w-full overflow-x-hidden">
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold flex items-center gap-3">
+          <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-3">
             <Brain className="h-8 w-8 text-primary" />
             AI Analytics & Insights
           </h1>
-          <p className="text-muted-foreground mt-1">
+          <p className="text-sm sm:text-base text-muted-foreground mt-1">
             Machine learning powered insights for business optimization
           </p>
         </div>
-        <div className="flex gap-3">
-          <Button variant="outline" className="rounded-2xl">
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+          <Button variant="outline" className="rounded-2xl w-full sm:w-auto">
             <Zap className="h-4 w-4 mr-2" />
             Train Models
           </Button>
-          <Button className="bg-primary hover:bg-primary/90 rounded-2xl">
+          <Button className="bg-primary hover:bg-primary/90 rounded-2xl w-full sm:w-auto">
             <Sparkles className="h-4 w-4 mr-2" />
             Generate Report
           </Button>

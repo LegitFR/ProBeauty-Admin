@@ -320,19 +320,19 @@ export function ECommerceManagement() {
   ).length;
 
   return (
-    <div className="space-y-6 p-6">
-      <div className="flex justify-between items-center">
+    <div className="space-y-4 sm:space-y-6 p-4 sm:p-6 max-w-full overflow-x-hidden">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold flex items-center gap-3">
+          <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-3">
             <ShoppingCart className="h-8 w-8 text-primary" />
             E-Commerce Management
           </h1>
-          <p className="text-muted-foreground mt-1">
+          <p className="text-sm sm:text-base text-muted-foreground mt-1">
             Manage products, inventory, orders, and online sales
           </p>
         </div>
-        <div className="flex items-center gap-3">
-          <Button variant="outline" className="rounded-2xl">
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+          <Button variant="outline" className="rounded-2xl w-full sm:w-auto">
             <Download className="h-4 w-4 mr-2" />
             Export Data
           </Button>
@@ -343,7 +343,7 @@ export function ECommerceManagement() {
                 Add Product
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+            <DialogContent className="max-w-[95vw] sm:max-w-4xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>Add New Product</DialogTitle>
               </DialogHeader>
@@ -455,60 +455,70 @@ export function ECommerceManagement() {
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card className="p-6">
+        <Card className="p-4 sm:p-6">
           <CardContent className="p-0">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-blue-100 rounded-xl">
-                <Package className="h-5 w-5 text-blue-600" />
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="p-1.5 sm:p-2 bg-blue-100 rounded-xl">
+                <Package className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Total Products</p>
-                <p className="text-2xl font-bold">{totalProducts}</p>
+                <p className="text-xs sm:text-sm text-muted-foreground">
+                  Total Products
+                </p>
+                <p className="text-xl sm:text-2xl font-bold">{totalProducts}</p>
                 <p className="text-xs text-green-600">+12 this month</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="p-6">
+        <Card className="p-4 sm:p-6">
           <CardContent className="p-0">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-orange-100 rounded-xl">
-                <AlertTriangle className="h-5 w-5 text-orange-600" />
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="p-1.5 sm:p-2 bg-orange-100 rounded-xl">
+                <AlertTriangle className="h-4 w-4 sm:h-5 sm:w-5 text-orange-600" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Low Stock Items</p>
-                <p className="text-2xl font-bold">{lowStockProducts}</p>
+                <p className="text-xs sm:text-sm text-muted-foreground">
+                  Low Stock Items
+                </p>
+                <p className="text-xl sm:text-2xl font-bold">
+                  {lowStockProducts}
+                </p>
                 <p className="text-xs text-orange-600">Need reorder</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="p-6">
+        <Card className="p-4 sm:p-6">
           <CardContent className="p-0">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-green-100 rounded-xl">
-                <ShoppingCart className="h-5 w-5 text-green-600" />
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="p-1.5 sm:p-2 bg-green-100 rounded-xl">
+                <ShoppingCart className="h-4 w-4 sm:h-5 sm:w-5 text-green-600" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Orders Today</p>
-                <p className="text-2xl font-bold">{totalOrders}</p>
+                <p className="text-xs sm:text-sm text-muted-foreground">
+                  Orders Today
+                </p>
+                <p className="text-xl sm:text-2xl font-bold">{totalOrders}</p>
                 <p className="text-xs text-green-600">+15% from yesterday</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="p-6">
+        <Card className="p-4 sm:p-6">
           <CardContent className="p-0">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-primary/10 rounded-xl">
-                <DollarSign className="h-5 w-5 text-primary" />
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="p-1.5 sm:p-2 bg-primary/10 rounded-xl">
+                <DollarSign className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Total Revenue</p>
-                <p className="text-2xl font-bold">
+                <p className="text-xs sm:text-sm text-muted-foreground">
+                  Total Revenue
+                </p>
+                <p className="text-xl sm:text-2xl font-bold">
                   ${totalRevenue.toLocaleString()}
                 </p>
                 <p className="text-xs text-green-600">+8% this month</p>
@@ -523,47 +533,59 @@ export function ECommerceManagement() {
         onValueChange={setActiveTab}
         className="space-y-6"
       >
-        <TabsList className="grid w-full grid-cols-4 rounded-2xl">
-          <TabsTrigger value="products" className="rounded-xl">
-            <Package className="h-4 w-4 mr-2" />
-            Products
+        <TabsList className="grid w-full grid-cols-4 rounded-2xl p-1">
+          <TabsTrigger
+            value="products"
+            className="rounded-xl text-xs sm:text-sm px-2 sm:px-3"
+          >
+            <Package className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
+            <span className="hidden xs:inline ml-1 sm:ml-0">Products</span>
           </TabsTrigger>
-          <TabsTrigger value="orders" className="rounded-xl">
-            <ShoppingCart className="h-4 w-4 mr-2" />
-            Orders
+          <TabsTrigger
+            value="orders"
+            className="rounded-xl text-xs sm:text-sm px-2 sm:px-3"
+          >
+            <ShoppingCart className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
+            <span className="hidden xs:inline ml-1 sm:ml-0">Orders</span>
           </TabsTrigger>
-          <TabsTrigger value="inventory" className="rounded-xl">
-            <BarChart3 className="h-4 w-4 mr-2" />
-            Inventory
+          <TabsTrigger
+            value="inventory"
+            className="rounded-xl text-xs sm:text-sm px-2 sm:px-3"
+          >
+            <BarChart3 className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
+            <span className="hidden xs:inline ml-1 sm:ml-0">Inventory</span>
           </TabsTrigger>
-          <TabsTrigger value="analytics" className="rounded-xl">
-            <TrendingUp className="h-4 w-4 mr-2" />
-            Analytics
+          <TabsTrigger
+            value="analytics"
+            className="rounded-xl text-xs sm:text-sm px-2 sm:px-3"
+          >
+            <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
+            <span className="hidden xs:inline ml-1 sm:ml-0">Analytics</span>
           </TabsTrigger>
         </TabsList>
 
         <TabsContent value="products" className="space-y-6">
           {/* Search and Filters */}
           <Card>
-            <CardContent className="p-4">
-              <div className="flex flex-col md:flex-row gap-4">
+            <CardContent className="p-3 sm:p-4">
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
                 <div className="relative flex-1">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
-                    placeholder="Search products by name, brand, or SKU..."
+                    placeholder="Search products..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10"
+                    className="pl-10 h-9 sm:h-10 text-sm"
                   />
                 </div>
-                <div className="flex items-center gap-3">
-                  <Filter className="h-4 w-4 text-muted-foreground" />
+                <div className="flex items-center gap-2 sm:gap-3 overflow-x-auto">
+                  <Filter className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                   <Select
                     value={categoryFilter}
                     onValueChange={setCategoryFilter}
                   >
-                    <SelectTrigger className="w-48">
-                      <SelectValue placeholder="All Categories" />
+                    <SelectTrigger className="w-32 sm:w-40 h-9 sm:h-10 text-xs sm:text-sm">
+                      <SelectValue placeholder="Category" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">All Categories</SelectItem>
@@ -577,8 +599,8 @@ export function ECommerceManagement() {
                     </SelectContent>
                   </Select>
                   <Select value={statusFilter} onValueChange={setStatusFilter}>
-                    <SelectTrigger className="w-48">
-                      <SelectValue placeholder="All Status" />
+                    <SelectTrigger className="w-28 sm:w-36 h-9 sm:h-10 text-xs sm:text-sm">
+                      <SelectValue placeholder="Status" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">All Status</SelectItem>
@@ -593,7 +615,7 @@ export function ECommerceManagement() {
           </Card>
 
           {/* Product Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
             {filteredProducts.map((product) => {
               const stockStatus = getStockStatus(product);
               return (
@@ -747,7 +769,7 @@ export function ECommerceManagement() {
                                 </Badge>
                               </div>
 
-                              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 text-sm">
                                 <div>
                                   <p className="text-muted-foreground">
                                     Customer
@@ -916,7 +938,7 @@ export function ECommerceManagement() {
         </TabsContent>
 
         <TabsContent value="analytics" className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
             <Card>
               <CardHeader>
                 <CardTitle>Top Selling Products</CardTitle>

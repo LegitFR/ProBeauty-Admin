@@ -204,24 +204,24 @@ export function ReportsAnalytics() {
   const categories = ["all", "financial", "operations", "customer", "quality"];
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-4 sm:space-y-6 p-4 sm:p-6 max-w-full overflow-x-hidden">
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold flex items-center gap-3">
+          <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-3">
             <FileText className="h-8 w-8 text-primary" />
             Reports & Analytics
           </h1>
-          <p className="text-muted-foreground mt-1">
+          <p className="text-sm sm:text-base text-muted-foreground mt-1">
             Comprehensive reporting and business intelligence dashboard
           </p>
         </div>
-        <div className="flex gap-3">
-          <Button variant="outline" className="rounded-2xl">
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+          <Button variant="outline" className="rounded-2xl w-full sm:w-auto">
             <RefreshCw className="h-4 w-4 mr-2" />
             Refresh Data
           </Button>
-          <Button className="bg-primary hover:bg-primary/90 rounded-2xl">
+          <Button className="bg-primary hover:bg-primary/90 rounded-2xl w-full sm:w-auto">
             <Download className="h-4 w-4 mr-2" />
             Export All
           </Button>
@@ -229,24 +229,28 @@ export function ReportsAnalytics() {
       </div>
 
       {/* Performance Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
         {performanceMetrics.map((metric, index) => (
-          <Card key={index} className="p-6">
+          <Card key={index} className="p-3 sm:p-4 lg:p-6">
             <CardContent className="p-0">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-xs sm:text-sm text-muted-foreground">
                     {metric.metric}
                   </p>
-                  <p className="text-2xl font-bold">{metric.value}</p>
+                  <p className="text-xl sm:text-2xl font-bold">
+                    {metric.value}
+                  </p>
                 </div>
                 <div
                   className={`flex items-center gap-1 ${
                     metric.trend === "up" ? "text-green-600" : "text-red-600"
                   }`}
                 >
-                  <TrendingUp className="h-4 w-4" />
-                  <span className="text-sm font-medium">{metric.change}</span>
+                  <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4" />
+                  <span className="text-xs sm:text-sm font-medium">
+                    {metric.change}
+                  </span>
                 </div>
               </div>
             </CardContent>
@@ -255,17 +259,17 @@ export function ReportsAnalytics() {
       </div>
 
       {/* Custom Report Builder */}
-      <Card className="p-6">
-        <CardHeader className="p-0 pb-4">
-          <CardTitle className="flex items-center gap-2">
-            <Target className="h-5 w-5 text-primary" />
+      <Card className="p-3 sm:p-4 lg:p-6">
+        <CardHeader className="p-0 pb-3 sm:pb-4">
+          <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+            <Target className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
             Custom Report Builder
           </CardTitle>
         </CardHeader>
         <CardContent className="p-0">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 lg:gap-4 mb-3 sm:mb-4">
             <Select value={selectedMetric} onValueChange={setSelectedMetric}>
-              <SelectTrigger>
+              <SelectTrigger className="h-9 sm:h-10 text-xs sm:text-sm">
                 <SelectValue placeholder="Select Metric" />
               </SelectTrigger>
               <SelectContent>
@@ -278,9 +282,14 @@ export function ReportsAnalytics() {
 
             <Popover>
               <PopoverTrigger asChild>
-                <Button variant="outline" className="justify-start">
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {dateRange ? dateRange.toLocaleDateString() : "Pick a date"}
+                <Button
+                  variant="outline"
+                  className="justify-start h-9 sm:h-10 text-xs sm:text-sm"
+                >
+                  <CalendarIcon className="mr-2 h-3 w-3 sm:h-4 sm:w-4" />
+                  <span className="truncate">
+                    {dateRange ? dateRange.toLocaleDateString() : "Pick a date"}
+                  </span>
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0">
@@ -294,7 +303,7 @@ export function ReportsAnalytics() {
             </Popover>
 
             <Select defaultValue="salon">
-              <SelectTrigger>
+              <SelectTrigger className="h-9 sm:h-10 text-xs sm:text-sm">
                 <SelectValue placeholder="Dimension" />
               </SelectTrigger>
               <SelectContent>
@@ -305,13 +314,13 @@ export function ReportsAnalytics() {
               </SelectContent>
             </Select>
 
-            <Button className="bg-primary hover:bg-primary/90 rounded-2xl">
+            <Button className="bg-primary hover:bg-primary/90 rounded-2xl h-9 sm:h-10 text-xs sm:text-sm">
               Generate Report
             </Button>
           </div>
 
-          <div className="bg-muted/30 rounded-2xl p-4">
-            <ResponsiveContainer width="100%" height={250}>
+          <div className="bg-muted/30 rounded-2xl p-2 sm:p-3 lg:p-4">
+            <ResponsiveContainer width="100%" height={200}>
               <AreaChart data={trendData}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="month" />
@@ -348,11 +357,11 @@ export function ReportsAnalytics() {
       </Card>
 
       {/* Report Templates */}
-      <Card className="p-6">
-        <CardHeader className="p-0 pb-4">
-          <CardTitle className="flex items-center justify-between">
-            <span>Report Templates</span>
-            <div className="flex gap-2">
+      <Card className="p-3 sm:p-4 lg:p-6">
+        <CardHeader className="p-0 pb-3 sm:pb-4">
+          <CardTitle className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <span className="text-base sm:text-lg">Report Templates</span>
+            <div className="flex gap-1.5 sm:gap-2 overflow-x-auto pb-2 sm:pb-0 -mx-1 px-1">
               {categories.map((category) => (
                 <Button
                   key={category}
@@ -361,7 +370,7 @@ export function ReportsAnalytics() {
                   }
                   size="sm"
                   onClick={() => setSelectedCategory(category)}
-                  className="rounded-2xl capitalize"
+                  className="rounded-2xl capitalize text-xs sm:text-sm px-2 sm:px-3 h-8 sm:h-9 whitespace-nowrap flex-shrink-0"
                 >
                   {category}
                 </Button>
@@ -370,32 +379,34 @@ export function ReportsAnalytics() {
           </CardTitle>
         </CardHeader>
         <CardContent className="p-0">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
             {filteredReports.map((report) => (
               <Card
                 key={report.id}
-                className="p-4 hover:shadow-md transition-shadow"
+                className="p-3 sm:p-4 hover:shadow-md transition-shadow"
               >
                 <CardContent className="p-0">
-                  <div className="flex items-start gap-3 mb-3">
-                    <div className="p-2 bg-primary/10 rounded-xl">
-                      <report.icon className="h-5 w-5 text-primary" />
+                  <div className="flex items-start gap-2 sm:gap-3 mb-2 sm:mb-3">
+                    <div className="p-1.5 sm:p-2 bg-primary/10 rounded-xl flex-shrink-0">
+                      <report.icon className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
                     </div>
-                    <div className="flex-1">
-                      <h3 className="font-semibold mb-1">{report.name}</h3>
-                      <p className="text-sm text-muted-foreground mb-2">
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-semibold mb-1 text-sm sm:text-base truncate">
+                        {report.name}
+                      </h3>
+                      <p className="text-xs sm:text-sm text-muted-foreground mb-2 line-clamp-2">
                         {report.description}
                       </p>
-                      <div className="flex gap-2 mb-3">
+                      <div className="flex gap-1.5 sm:gap-2 mb-2 sm:mb-3 flex-wrap">
                         <Badge
                           variant="secondary"
-                          className="rounded-full text-xs"
+                          className="rounded-full text-[10px] sm:text-xs"
                         >
                           {report.category}
                         </Badge>
                         <Badge
                           variant="outline"
-                          className="rounded-full text-xs"
+                          className="rounded-full text-[10px] sm:text-xs"
                         >
                           {report.frequency}
                         </Badge>
@@ -403,20 +414,20 @@ export function ReportsAnalytics() {
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between text-sm mb-3">
+                  <div className="flex items-center justify-between text-xs sm:text-sm mb-2 sm:mb-3">
                     <span className="text-muted-foreground">
                       Last generated:
                     </span>
                     <span className="font-medium">{report.lastGenerated}</span>
                   </div>
 
-                  <div className="flex gap-2">
+                  <div className="flex gap-1.5 sm:gap-2 flex-wrap">
                     {report.format.map((format) => (
                       <Button
                         key={format}
                         size="sm"
                         variant="outline"
-                        className="rounded-2xl text-xs"
+                        className="rounded-2xl text-[10px] sm:text-xs h-7 sm:h-8 px-2 sm:px-3"
                       >
                         <Download className="h-3 w-3 mr-1" />
                         {format}
@@ -431,18 +442,20 @@ export function ReportsAnalytics() {
       </Card>
 
       {/* Performance Benchmarking */}
-      <Card className="p-6">
-        <CardHeader className="p-0 pb-4">
-          <CardTitle className="flex items-center gap-2">
-            <BarChart3 className="h-5 w-5 text-primary" />
+      <Card className="p-3 sm:p-4 lg:p-6">
+        <CardHeader className="p-0 pb-3 sm:pb-4">
+          <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+            <BarChart3 className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
             Performance Benchmarking
           </CardTitle>
         </CardHeader>
         <CardContent className="p-0">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
             <div>
-              <h4 className="font-semibold mb-4">Revenue vs Efficiency</h4>
-              <ResponsiveContainer width="100%" height={300}>
+              <h4 className="font-semibold mb-3 sm:mb-4 text-sm sm:text-base">
+                Revenue vs Efficiency
+              </h4>
+              <ResponsiveContainer width="100%" height={250}>
                 <BarChart data={benchmarkData}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis
@@ -466,19 +479,21 @@ export function ReportsAnalytics() {
             </div>
 
             <div>
-              <h4 className="font-semibold mb-4">Top Performing Salons</h4>
-              <div className="space-y-3">
+              <h4 className="font-semibold mb-3 sm:mb-4 text-sm sm:text-base">
+                Top Performing Salons
+              </h4>
+              <div className="space-y-2 sm:space-y-3">
                 {[...benchmarkData]
                   .sort((a, b) => b.revenue - a.revenue)
                   .slice(0, 5)
                   .map((salon, index) => (
                     <div
                       key={salon.salon}
-                      className="flex items-center justify-between p-3 bg-muted/30 rounded-2xl"
+                      className="flex items-center justify-between p-2 sm:p-3 bg-muted/30 rounded-2xl gap-2"
                     >
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
                         <div
-                          className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                          className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs sm:text-sm flex-shrink-0 ${
                             index === 0
                               ? "bg-yellow-100 text-yellow-600"
                               : index === 1
@@ -490,19 +505,21 @@ export function ReportsAnalytics() {
                         >
                           {index + 1}
                         </div>
-                        <div>
-                          <p className="font-medium">{salon.salon}</p>
-                          <p className="text-sm text-muted-foreground">
+                        <div className="min-w-0 flex-1">
+                          <p className="font-medium text-sm sm:text-base truncate">
+                            {salon.salon}
+                          </p>
+                          <p className="text-xs sm:text-sm text-muted-foreground truncate">
                             {salon.bookings} bookings • {salon.rating}★
                           </p>
                         </div>
                       </div>
-                      <div className="text-right">
-                        <p className="font-semibold">
+                      <div className="text-right flex-shrink-0">
+                        <p className="font-semibold text-sm sm:text-base">
                           ${(salon.revenue / 1000).toFixed(0)}K
                         </p>
-                        <p className="text-sm text-muted-foreground">
-                          {salon.efficiency}% efficiency
+                        <p className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap">
+                          {salon.efficiency}% eff
                         </p>
                       </div>
                     </div>
@@ -514,41 +531,56 @@ export function ReportsAnalytics() {
       </Card>
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="p-6">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
+        <Card className="p-4 sm:p-6">
           <CardContent className="p-0 text-center">
-            <Clock className="h-8 w-8 text-primary mx-auto mb-3" />
-            <h3 className="font-semibold mb-2">Scheduled Reports</h3>
-            <p className="text-sm text-muted-foreground mb-4">
+            <Clock className="h-6 w-6 sm:h-8 sm:w-8 text-primary mx-auto mb-2 sm:mb-3" />
+            <h3 className="font-semibold mb-2 text-sm sm:text-base">
+              Scheduled Reports
+            </h3>
+            <p className="text-xs sm:text-sm text-muted-foreground mb-3 sm:mb-4">
               Manage automated report generation and delivery
             </p>
-            <Button variant="outline" className="rounded-2xl">
+            <Button
+              variant="outline"
+              className="rounded-2xl text-xs sm:text-sm h-8 sm:h-10"
+            >
               Manage Schedule
             </Button>
           </CardContent>
         </Card>
 
-        <Card className="p-6">
+        <Card className="p-4 sm:p-6">
           <CardContent className="p-0 text-center">
-            <Bookmark className="h-8 w-8 text-primary mx-auto mb-3" />
-            <h3 className="font-semibold mb-2">Saved Reports</h3>
-            <p className="text-sm text-muted-foreground mb-4">
+            <Bookmark className="h-6 w-6 sm:h-8 sm:w-8 text-primary mx-auto mb-2 sm:mb-3" />
+            <h3 className="font-semibold mb-2 text-sm sm:text-base">
+              Saved Reports
+            </h3>
+            <p className="text-xs sm:text-sm text-muted-foreground mb-3 sm:mb-4">
               Access your saved custom reports and analysis
             </p>
-            <Button variant="outline" className="rounded-2xl">
+            <Button
+              variant="outline"
+              className="rounded-2xl text-xs sm:text-sm h-8 sm:h-10"
+            >
               View Saved
             </Button>
           </CardContent>
         </Card>
 
-        <Card className="p-6">
+        <Card className="p-4 sm:p-6">
           <CardContent className="p-0 text-center">
-            <Share className="h-8 w-8 text-primary mx-auto mb-3" />
-            <h3 className="font-semibold mb-2">Share & Collaborate</h3>
-            <p className="text-sm text-muted-foreground mb-4">
+            <Share className="h-6 w-6 sm:h-8 sm:w-8 text-primary mx-auto mb-2 sm:mb-3" />
+            <h3 className="font-semibold mb-2 text-sm sm:text-base">
+              Share & Collaborate
+            </h3>
+            <p className="text-xs sm:text-sm text-muted-foreground mb-3 sm:mb-4">
               Share reports with team members and stakeholders
             </p>
-            <Button variant="outline" className="rounded-2xl">
+            <Button
+              variant="outline"
+              className="rounded-2xl text-xs sm:text-sm h-8 sm:h-10"
+            >
               Share Report
             </Button>
           </CardContent>
