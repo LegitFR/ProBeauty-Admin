@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
@@ -89,6 +89,17 @@ export function BookingManagement() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [isNewBookingOpen, setIsNewBookingOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 640);
+    };
+
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
 
   const [bookings] = useState<Booking[]>([
     {
@@ -660,7 +671,7 @@ export function BookingManagement() {
 
                     <div className="space-y-0.5 sm:space-y-1">
                       {day.bookings
-                        .slice(0, window.innerWidth < 640 ? 1 : 3)
+                        .slice(0, isMobile ? 1 : 3)
                         .map((booking, idx) => (
                           <div
                             key={idx}
@@ -681,11 +692,11 @@ export function BookingManagement() {
                           </div>
                         ))}
                       {day.bookings.length >
-                        (window.innerWidth < 640 ? 1 : 3) && (
+                        (isMobile ? 1 : 3) && (
                         <div className="text-[10px] sm:text-xs text-muted-foreground">
                           +
                           {day.bookings.length -
-                            (window.innerWidth < 640 ? 1 : 3)}
+                            (isMobile ? 1 : 3)}
                         </div>
                       )}
                     </div>
