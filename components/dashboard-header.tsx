@@ -24,6 +24,7 @@ import {
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 import { ProfileModal } from "./profile-modal";
+import { useAuth } from "@/lib/context/AuthContext";
 
 interface DashboardHeaderProps {
   isDark: boolean;
@@ -39,6 +40,8 @@ export function DashboardHeader({
   notificationCount,
 }: DashboardHeaderProps) {
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const { user, logout } = useAuth();
+
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
       <div className="flex h-16 items-center px-3 sm:px-4 md:px-6">
@@ -96,7 +99,11 @@ export function DashboardHeader({
                 <Avatar className="h-9 w-9">
                   <AvatarImage src="/api/placeholder/32/32" alt="Admin" />
                   <AvatarFallback className="bg-primary text-primary-foreground">
-                    PA
+                    {user?.name
+                      ?.split(" ")
+                      .map((n) => n[0])
+                      .join("")
+                      .toUpperCase() || "PA"}
                   </AvatarFallback>
                 </Avatar>
               </Button>
@@ -104,9 +111,11 @@ export function DashboardHeader({
             <DropdownMenuContent className="w-56" align="end" forceMount>
               <DropdownMenuLabel className="font-normal">
                 <div className="flex flex-col space-y-1">
-                  <p className="font-medium leading-none">ProBeauty Admin</p>
+                  <p className="font-medium leading-none">
+                    {user?.name || "ProBeauty Admin"}
+                  </p>
                   <p className="text-xs leading-none text-muted-foreground">
-                    admin@probeauty.com
+                    {user?.email || "admin@probeauty.com"}
                   </p>
                 </div>
               </DropdownMenuLabel>
@@ -120,7 +129,7 @@ export function DashboardHeader({
                 <span>Settings</span>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="text-red-600">
+              <DropdownMenuItem className="text-red-600" onClick={logout}>
                 <LogOut className="mr-2 h-4 w-4" />
                 <span>Log out</span>
               </DropdownMenuItem>

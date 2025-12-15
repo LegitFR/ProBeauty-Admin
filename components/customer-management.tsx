@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
@@ -45,6 +45,10 @@ import {
   Edit,
   Ban,
 } from "lucide-react";
+import { BookingAPI } from "@/lib/services";
+import { ApiError } from "@/lib/utils/apiClient";
+import type { Booking as APIBooking } from "@/lib/types/api";
+import { AuthErrorMessage } from "./AuthErrorMessage";
 
 interface Customer {
   id: string;
@@ -62,90 +66,133 @@ interface Customer {
   tier: "Bronze" | "Silver" | "Gold" | "Platinum";
 }
 
-const customersData: Customer[] = [
-  {
-    id: "1",
-    name: "Sarah Johnson",
-    email: "sarah.j@email.com",
-    phone: "+1 (555) 123-4567",
-    joinDate: "2023-01-15",
-    lastVisit: "2024-01-12",
-    totalSpent: 2450,
-    visits: 18,
-    status: "vip",
-    rating: 5,
-    preferredSalon: "Glamour Studio",
-    avatar: "/api/placeholder/40/40",
-    tier: "Platinum",
-  },
-  {
-    id: "2",
-    name: "Emily Davis",
-    email: "emily.davis@email.com",
-    phone: "+1 (555) 234-5678",
-    joinDate: "2023-03-22",
-    lastVisit: "2024-01-14",
-    totalSpent: 1890,
-    visits: 14,
-    status: "active",
-    rating: 4.8,
-    preferredSalon: "Beauty Haven",
-    avatar: "/api/placeholder/40/40",
-    tier: "Gold",
-  },
-  {
-    id: "3",
-    name: "Michael Brown",
-    email: "m.brown@email.com",
-    phone: "+1 (555) 345-6789",
-    joinDate: "2023-05-10",
-    lastVisit: "2024-01-10",
-    totalSpent: 1200,
-    visits: 9,
-    status: "active",
-    rating: 4.5,
-    preferredSalon: "Style & Grace",
-    avatar: "/api/placeholder/40/40",
-    tier: "Silver",
-  },
-  {
-    id: "4",
-    name: "Jessica Wilson",
-    email: "jessica.w@email.com",
-    phone: "+1 (555) 456-7890",
-    joinDate: "2023-07-08",
-    lastVisit: "2023-12-20",
-    totalSpent: 650,
-    visits: 5,
-    status: "inactive",
-    rating: 4.2,
-    preferredSalon: "Elegant Touch",
-    avatar: "/api/placeholder/40/40",
-    tier: "Bronze",
-  },
-  {
-    id: "5",
-    name: "David Martinez",
-    email: "david.m@email.com",
-    phone: "+1 (555) 567-8901",
-    joinDate: "2023-09-15",
-    lastVisit: "2024-01-13",
-    totalSpent: 980,
-    visits: 7,
-    status: "active",
-    rating: 4.6,
-    preferredSalon: "Urban Chic",
-    avatar: "/api/placeholder/40/40",
-    tier: "Silver",
-  },
-];
-
 export function CustomerManagement() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [tierFilter, setTierFilter] = useState("all");
 
-  const filteredCustomers = customersData.filter((customer) => {
+  // API State
+  const [bookings, setBookings] = useState<APIBooking[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [isAuthError, setIsAuthError] = useState(false);
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const bookingsRes = await BookingAPI.getBookings({
+        page: 1,
+        limit: 1000,
+      });
+      setBookings(bookingsRes.data);
+    } catch (err) {
+      if (err instanceof ApiError) {
+        setError(err.message);
+      } else {
+        setError("Failed to load customer data");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Extract unique users from bookings and calculate stats
+  const userMap = new Map<
+    string,
+    {
+      user: APIBooking["user"];
+      bookings: APIBooking[];
+    }
+  >();
+
+  bookings.forEach((booking) => {
+    const userId = booking.user.id;
+    if (!userMap.has(userId)) {
+      userMap.set(userId, {
+        user: booking.user,
+        bookings: [],
+      });
+    }
+    userMap.get(userId)!.bookings.push(booking);
+  });
+
+  // Transform API users to local format
+  const transformedCustomers: Customer[] = Array.from(userMap.values()).map(
+    ({ user, bookings: userBookings }) => {
+      const totalSpent = userBookings.reduce(
+        (sum, b) => sum + parseFloat(b.service.price),
+        0
+      );
+      const visits = userBookings.length;
+
+      // Determine tier based on spending
+      let tier: "Bronze" | "Silver" | "Gold" | "Platinum" = "Bronze";
+      if (totalSpent > 2000) tier = "Platinum";
+      else if (totalSpent > 1500) tier = "Gold";
+      else if (totalSpent > 800) tier = "Silver";
+
+      // Determine status
+      let status: "active" | "inactive" | "vip" = "active";
+      if (totalSpent > 2000) status = "vip";
+      else if (visits === 0) status = "inactive";
+
+      const lastBooking = userBookings.sort(
+        (a, b) =>
+          new Date(b.startTime).getTime() - new Date(a.startTime).getTime()
+      )[0];
+
+      return {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        phone: "N/A", // Not in API
+        joinDate: "N/A", // Not in API
+        lastVisit: lastBooking
+          ? new Date(lastBooking.startTime).toLocaleDateString()
+          : "Never",
+        totalSpent,
+        visits,
+        status,
+        rating: 4.5, // Default rating (not in API)
+        preferredSalon: lastBooking?.salon.name || "None",
+        avatar: "/api/placeholder/40/40", // Not in API
+        tier,
+      };
+    }
+  );
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4 text-muted-foreground">Loading customers...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    if (isAuthError) {
+      return <AuthErrorMessage onRetry={fetchData} />;
+    }
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <p className="text-destructive mb-4">{error}</p>
+          <Button onClick={fetchData}>Try Again</Button>
+        </div>
+      </div>
+    );
+  }
+
+  const filteredCustomers = transformedCustomers.filter((customer) => {
     const matchesSearch =
       customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       customer.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -158,13 +205,16 @@ export function CustomerManagement() {
     return matchesSearch && matchesStatus && matchesTier;
   });
 
-  const totalCustomers = customersData.length;
-  const activeCustomers = customersData.filter(
+  const totalCustomers = transformedCustomers.length;
+  const activeCustomers = transformedCustomers.filter(
     (c) => c.status === "active" || c.status === "vip"
   ).length;
-  const vipCustomers = customersData.filter((c) => c.status === "vip").length;
+  const vipCustomers = transformedCustomers.filter(
+    (c) => c.status === "vip"
+  ).length;
   const avgSpent =
-    customersData.reduce((sum, c) => sum + c.totalSpent, 0) / totalCustomers;
+    transformedCustomers.reduce((sum, c) => sum + c.totalSpent, 0) /
+    (totalCustomers || 1);
 
   const getTierColor = (tier: string) => {
     switch (tier) {
@@ -554,7 +604,8 @@ export function CustomerManagement() {
       {/* Pagination */}
       <div className="flex justify-between items-center">
         <p className="text-sm text-muted-foreground">
-          Showing {filteredCustomers.length} of {customersData.length} customers
+          Showing {filteredCustomers.length} of {transformedCustomers.length}{" "}
+          customers
         </p>
         <div className="flex gap-2">
           <Button variant="outline" size="sm" disabled className="rounded-2xl">

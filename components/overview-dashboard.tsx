@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
@@ -15,6 +16,7 @@ import {
   Star,
   Clock,
   CheckCircle,
+  RefreshCw,
 } from "lucide-react";
 import {
   LineChart,
@@ -30,6 +32,9 @@ import {
   Pie,
   Cell,
 } from "recharts";
+import { SalonAPI, BookingAPI, UserAPI, ApiError } from "@/lib/services";
+import type { Salon, Booking } from "@/lib/types/api";
+import { AuthErrorMessage } from "./AuthErrorMessage";
 
 const kpiData = [
   {
@@ -118,6 +123,123 @@ const recentActivities = [
 ];
 
 export function OverviewDashboard() {
+  const [salons, setSalons] = useState<Salon[]>([]);
+  const [bookings, setBookings] = useState<Booking[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [isAuthError, setIsAuthError] = useState(false);
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
+
+  const fetchDashboardData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      setIsAuthError(false);
+
+      const [salonsRes, bookingsRes] = await Promise.all([
+        SalonAPI.getSalons({ page: 1, limit: 100 }),
+        BookingAPI.getBookings({ page: 1, limit: 100 }),
+      ]);
+
+      setSalons(salonsRes.data);
+      setBookings(bookingsRes.data);
+    } catch (err) {
+      if (err instanceof ApiError) {
+        if (err.status === 401) {
+          setIsAuthError(true);
+        }
+        setError(err.message);
+      } else {
+        setError("Failed to load dashboard data");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Calculate KPIs from real data
+  const totalBookings = bookings.length;
+  const totalSalons = salons.length;
+  const verifiedSalons = salons.filter((s) => s.verified).length;
+  const confirmedBookings = bookings.filter(
+    (b) => b.status === "CONFIRMED"
+  ).length;
+
+  const kpiData = [
+    {
+      title: "Total Revenue",
+      value: "$2,847,592",
+      change: "+12.5%",
+      trend: "up" as const,
+      icon: DollarSign,
+      period: "vs last month",
+    },
+    {
+      title: "Total Bookings",
+      value: totalBookings.toString(),
+      change: "+8.2%",
+      trend: "up" as const,
+      icon: Calendar,
+      period: "vs last month",
+    },
+    {
+      title: "Active Salons",
+      value: verifiedSalons.toString(),
+      change: "+15.3%",
+      trend: "up" as const,
+      icon: Users,
+      period: "vs last month",
+    },
+    {
+      title: "Partner Salons",
+      value: totalSalons.toString(),
+      change: "+3.1%",
+      trend: "up" as const,
+      icon: Building2,
+      period: "vs last month",
+    },
+  ];
+
+  // Recent activities from bookings
+  const recentActivities = bookings.slice(0, 4).map((booking) => ({
+    id: booking.id,
+    type: "booking" as const,
+    description: `New booking at ${booking.salon.name}`,
+    time: new Date(booking.startTime).toLocaleDateString(),
+    status: booking.status.toLowerCase(),
+    amount: `$${booking.service.price}`,
+  }));
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4 text-muted-foreground">
+            Loading dashboard data...
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    if (isAuthError) {
+      return <AuthErrorMessage onRetry={fetchDashboardData} />;
+    }
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <p className="text-destructive mb-4">{error}</p>
+          <Button onClick={fetchDashboardData}>Try Again</Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4 sm:space-y-6 p-4 sm:p-6 max-w-full overflow-x-hidden">
       {/* Page Header */}

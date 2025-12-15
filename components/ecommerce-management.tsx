@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
@@ -60,6 +60,10 @@ import {
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
+import { ProductAPI } from "@/lib/services";
+import { ApiError } from "@/lib/utils/apiClient";
+import type { Product as APIProduct } from "@/lib/types/api";
+import { AuthErrorMessage } from "./AuthErrorMessage";
 
 interface Product {
   id: string;
@@ -100,167 +104,89 @@ export function ECommerceManagement() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [isNewProductOpen, setIsNewProductOpen] = useState(false);
 
-  const [products] = useState<Product[]>([
-    {
-      id: "PRD-001",
-      name: "Premium Hair Serum - Argan Oil",
-      category: "Hair Care",
-      brand: "LuxeBeauty",
-      price: 89.99,
-      salePrice: 69.99,
-      stock: 3,
-      lowStockThreshold: 10,
-      description:
-        "Nourishing argan oil hair serum for damaged and dry hair. Provides deep hydration and shine.",
-      images: ["/api/placeholder/300/300"],
-      status: "active",
-      rating: 4.8,
-      reviews: 127,
-      sales: 234,
-      revenue: 16398.66,
-      sku: "LB-SERUM-001",
-      tags: ["bestseller", "organic", "paraben-free"],
-    },
-    {
-      id: "PRD-002",
-      name: "Moisturizing Face Cream - Deluxe",
-      category: "Skin Care",
-      brand: "GlowPro",
-      price: 125.0,
-      stock: 8,
-      lowStockThreshold: 15,
-      description:
-        "Anti-aging face cream with hyaluronic acid and peptides. Suitable for all skin types.",
-      images: ["/api/placeholder/300/300"],
-      status: "active",
-      rating: 4.6,
-      reviews: 89,
-      sales: 156,
-      revenue: 19500.0,
-      sku: "GP-CREAM-002",
-      tags: ["anti-aging", "hyaluronic", "luxury"],
-    },
-    {
-      id: "PRD-003",
-      name: "Professional Hair Dryer - Ionic",
-      category: "Tools & Equipment",
-      brand: "ProStyle",
-      price: 299.99,
-      stock: 15,
-      lowStockThreshold: 5,
-      description:
-        "Professional ionic hair dryer with multiple heat and speed settings. Includes diffuser attachment.",
-      images: ["/api/placeholder/300/300"],
-      status: "active",
-      rating: 4.7,
-      reviews: 203,
-      sales: 89,
-      revenue: 26699.11,
-      sku: "PS-DRYER-003",
-      tags: ["professional", "ionic", "salon-grade"],
-    },
-    {
-      id: "PRD-004",
-      name: "Nail Polish Set - Spring Collection",
-      category: "Nail Care",
-      brand: "ColorFusion",
-      price: 45.99,
-      stock: 0,
-      lowStockThreshold: 20,
-      description:
-        "Set of 6 nail polish colors in trendy spring shades. Long-lasting and chip-resistant formula.",
-      images: ["/api/placeholder/300/300"],
-      status: "out-of-stock",
-      rating: 4.4,
-      reviews: 67,
-      sales: 178,
-      revenue: 8186.22,
-      sku: "CF-POLISH-004",
-      tags: ["seasonal", "set", "chip-resistant"],
-    },
-    {
-      id: "PRD-005",
-      name: "Vitamin C Brightening Serum",
-      category: "Skin Care",
-      brand: "RadiantSkin",
-      price: 78.5,
-      stock: 22,
-      lowStockThreshold: 12,
-      description:
-        "Vitamin C serum with niacinamide for brighter, more even skin tone. Cruelty-free and vegan.",
-      images: ["/api/placeholder/300/300"],
-      status: "active",
-      rating: 4.9,
-      reviews: 145,
-      sales: 298,
-      revenue: 23393.0,
-      sku: "RS-SERUM-005",
-      tags: ["vitamin-c", "vegan", "cruelty-free", "brightening"],
-    },
-    {
-      id: "PRD-006",
-      name: "Luxury Makeup Brush Set",
-      category: "Makeup Tools",
-      brand: "ArtistPro",
-      price: 189.99,
-      stock: 12,
-      lowStockThreshold: 8,
-      description:
-        "Professional makeup brush set with synthetic bristles. Includes 15 brushes and leather case.",
-      images: ["/api/placeholder/300/300"],
-      status: "active",
-      rating: 4.8,
-      reviews: 98,
-      sales: 67,
-      revenue: 12729.33,
-      sku: "AP-BRUSH-006",
-      tags: ["professional", "synthetic", "luxury", "complete-set"],
-    },
-  ]);
+  // API State
+  const [products, setProducts] = useState<APIProduct[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [isAuthError, setIsAuthError] = useState(false);
 
-  const [orders] = useState<Order[]>([
-    {
-      id: "ORD-2024-001",
-      customerName: "Sarah Johnson",
-      customerEmail: "sarah.j@email.com",
-      items: [
-        { product: "Premium Hair Serum", quantity: 2, price: 69.99 },
-        { product: "Moisturizing Face Cream", quantity: 1, price: 125.0 },
-      ],
-      total: 264.98,
-      status: "shipped",
-      orderDate: "2024-12-06",
-      shippingAddress: "123 Main St, New York, NY 10001",
-      paymentMethod: "Credit Card",
-    },
-    {
-      id: "ORD-2024-002",
-      customerName: "Michael Chen",
-      customerEmail: "m.chen@email.com",
-      items: [
-        { product: "Professional Hair Dryer", quantity: 1, price: 299.99 },
-      ],
-      total: 299.99,
-      status: "processing",
-      orderDate: "2024-12-07",
-      shippingAddress: "456 Oak Ave, Los Angeles, CA 90210",
-      paymentMethod: "PayPal",
-    },
-    {
-      id: "ORD-2024-003",
-      customerName: "Emma Williams",
-      customerEmail: "emma.w@email.com",
-      items: [
-        { product: "Vitamin C Serum", quantity: 1, price: 78.5 },
-        { product: "Luxury Brush Set", quantity: 1, price: 189.99 },
-      ],
-      total: 268.49,
-      status: "delivered",
-      orderDate: "2024-12-05",
-      shippingAddress: "789 Pine St, Chicago, IL 60601",
-      paymentMethod: "Credit Card",
-    },
-  ]);
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  const fetchProducts = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      setIsAuthError(false);
+
+      const response = await ProductAPI.getProducts({ page: 1, limit: 100 });
+      setProducts(response.data);
+    } catch (err) {
+      if (err instanceof ApiError) {
+        if (err.status === 401) {
+          setIsAuthError(true);
+        }
+        setError(err.message);
+      } else {
+        setError("Failed to load products data");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Transform API products to local format
+  const transformedProducts: Product[] = products.map((p) => {
+    // Determine stock status
+    let status: "active" | "inactive" | "out-of-stock" = "active";
+    if (p.quantity === 0) status = "out-of-stock";
+
+    return {
+      id: p.id,
+      name: p.title,
+      category: "Uncategorized", // Not in API
+      brand: "Unknown", // Not in API
+      price: p.price,
+      salePrice: undefined, // Not in API
+      stock: p.quantity,
+      lowStockThreshold: 10, // Default threshold
+      description: "", // Not in API
+      images: p.images || [],
+      status,
+      rating: 4.5, // Not in API
+      reviews: 0, // Not in API
+      sales: 0, // Not in API
+      revenue: 0, // Not in API
+      sku: p.sku,
+      tags: [], // Not in API
+    };
+  });
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4 text-muted-foreground">Loading products...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    if (isAuthError) {
+      return <AuthErrorMessage onRetry={fetchProducts} />;
+    }
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <p className="text-destructive mb-4">{error}</p>
+          <Button onClick={fetchProducts}>Try Again</Button>
+        </div>
+      </div>
+    );
+  }
 
   const getStockStatus = (product: Product) => {
     if (product.stock === 0)
@@ -296,7 +222,7 @@ export function ECommerceManagement() {
     }
   };
 
-  const filteredProducts = products.filter((product) => {
+  const filteredProducts = transformedProducts.filter((product) => {
     const matchesSearch =
       product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       product.brand.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -308,16 +234,17 @@ export function ECommerceManagement() {
     return matchesSearch && matchesCategory && matchesStatus;
   });
 
-  const totalProducts = products.length;
-  const lowStockProducts = products.filter(
+  const totalProducts = transformedProducts.length;
+  const lowStockProducts = transformedProducts.filter(
     (p) => p.stock <= p.lowStockThreshold && p.stock > 0
   ).length;
-  const outOfStockProducts = products.filter((p) => p.stock === 0).length;
-  const totalRevenue = products.reduce((sum, p) => sum + p.revenue, 0);
-  const totalOrders = orders.length;
-  const pendingOrders = orders.filter(
-    (o) => o.status === "pending" || o.status === "processing"
+  const outOfStockProducts = transformedProducts.filter(
+    (p) => p.stock === 0
   ).length;
+  const totalRevenue = transformedProducts.reduce(
+    (sum, p) => sum + p.revenue,
+    0
+  );
 
   return (
     <div className="space-y-4 sm:space-y-6 p-4 sm:p-6 max-w-full overflow-x-hidden">
@@ -501,8 +428,8 @@ export function ECommerceManagement() {
                 <p className="text-xs sm:text-sm text-muted-foreground">
                   Orders Today
                 </p>
-                <p className="text-xl sm:text-2xl font-bold">{totalOrders}</p>
-                <p className="text-xs text-green-600">+15% from yesterday</p>
+                <p className="text-xl sm:text-2xl font-bold">0</p>
+                <p className="text-xs text-green-600">Orders not available</p>
               </div>
             </div>
           </CardContent>
@@ -743,125 +670,14 @@ export function ECommerceManagement() {
         <TabsContent value="orders" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Recent Orders ({orders.length})</CardTitle>
+              <CardTitle>Recent Orders</CardTitle>
             </CardHeader>
-            <CardContent className="p-0">
-              <ScrollArea className="h-[600px]">
-                <div className="space-y-1 p-6">
-                  {orders.map((order, index) => (
-                    <div key={order.id}>
-                      <div className="flex items-start gap-4 p-4 rounded-xl hover:bg-muted/50 transition-colors">
-                        <div className="p-2 bg-primary/10 rounded-xl">
-                          <ShoppingCart className="h-5 w-5 text-primary" />
-                        </div>
-
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-start justify-between gap-2">
-                            <div className="flex-1">
-                              <div className="flex items-center gap-3 mb-2">
-                                <h4 className="font-medium">{order.id}</h4>
-                                <Badge
-                                  className={`text-xs rounded-full ${getOrderStatusColor(
-                                    order.status
-                                  )}`}
-                                >
-                                  {order.status}
-                                </Badge>
-                              </div>
-
-                              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 text-sm">
-                                <div>
-                                  <p className="text-muted-foreground">
-                                    Customer
-                                  </p>
-                                  <p className="font-medium">
-                                    {order.customerName}
-                                  </p>
-                                  <p className="text-muted-foreground">
-                                    {order.customerEmail}
-                                  </p>
-                                </div>
-
-                                <div>
-                                  <p className="text-muted-foreground">
-                                    Order Details
-                                  </p>
-                                  <p className="font-medium">
-                                    ${order.total.toFixed(2)}
-                                  </p>
-                                  <p className="text-muted-foreground">
-                                    {order.items.length} items
-                                  </p>
-                                </div>
-
-                                <div>
-                                  <p className="text-muted-foreground">
-                                    Date & Payment
-                                  </p>
-                                  <p className="font-medium">
-                                    {order.orderDate}
-                                  </p>
-                                  <p className="text-muted-foreground">
-                                    {order.paymentMethod}
-                                  </p>
-                                </div>
-                              </div>
-
-                              <div className="mt-3 p-3 bg-muted/30 rounded-lg">
-                                <p className="text-sm font-medium mb-1">
-                                  Items:
-                                </p>
-                                <div className="space-y-1">
-                                  {order.items.map((item, idx) => (
-                                    <p
-                                      key={idx}
-                                      className="text-sm text-muted-foreground"
-                                    >
-                                      {item.quantity}x {item.product} - $
-                                      {item.price}
-                                    </p>
-                                  ))}
-                                </div>
-                              </div>
-                            </div>
-
-                            <div className="flex items-center gap-2">
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="h-8 w-8 p-0"
-                                  >
-                                    <MoreHorizontal className="h-4 w-4" />
-                                  </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                  <DropdownMenuItem>
-                                    <Eye className="h-4 w-4 mr-2" />
-                                    View Details
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem>
-                                    <Truck className="h-4 w-4 mr-2" />
-                                    Update Status
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem>
-                                    <Download className="h-4 w-4 mr-2" />
-                                    Print Invoice
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      {index < orders.length - 1 && (
-                        <Separator className="my-2" />
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </ScrollArea>
+            <CardContent>
+              <div className="flex items-center justify-center py-12">
+                <p className="text-muted-foreground">
+                  Order management not available in current API
+                </p>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
@@ -877,7 +693,7 @@ export function ECommerceManagement() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {products
+                  {transformedProducts
                     .filter(
                       (p) => p.stock <= p.lowStockThreshold && p.stock > 0
                     )
@@ -913,7 +729,7 @@ export function ECommerceManagement() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {products
+                  {transformedProducts
                     .filter((p) => p.stock === 0)
                     .map((product) => (
                       <div
@@ -944,34 +760,10 @@ export function ECommerceManagement() {
                 <CardTitle>Top Selling Products</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  {products
-                    .sort((a, b) => b.sales - a.sales)
-                    .slice(0, 5)
-                    .map((product, index) => (
-                      <div
-                        key={product.id}
-                        className="flex items-center justify-between"
-                      >
-                        <div className="flex items-center gap-3">
-                          <span className="text-sm font-medium text-muted-foreground">
-                            #{index + 1}
-                          </span>
-                          <div>
-                            <p className="font-medium">{product.name}</p>
-                            <p className="text-sm text-muted-foreground">
-                              {product.brand}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <p className="font-bold">{product.sales} sold</p>
-                          <p className="text-sm text-muted-foreground">
-                            ${product.revenue.toLocaleString()}
-                          </p>
-                        </div>
-                      </div>
-                    ))}
+                <div className="flex items-center justify-center py-12">
+                  <p className="text-muted-foreground">
+                    Sales analytics not available in current API
+                  </p>
                 </div>
               </CardContent>
             </Card>
@@ -981,26 +773,10 @@ export function ECommerceManagement() {
                 <CardTitle>Revenue by Category</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  {Object.entries(
-                    products.reduce((acc, product) => {
-                      acc[product.category] =
-                        (acc[product.category] || 0) + product.revenue;
-                      return acc;
-                    }, {} as Record<string, number>)
-                  )
-                    .sort(([, a], [, b]) => b - a)
-                    .map(([category, revenue]) => (
-                      <div
-                        key={category}
-                        className="flex justify-between items-center"
-                      >
-                        <span className="font-medium">{category}</span>
-                        <span className="font-bold">
-                          ${revenue.toLocaleString()}
-                        </span>
-                      </div>
-                    ))}
+                <div className="flex items-center justify-center py-12">
+                  <p className="text-muted-foreground">
+                    Revenue analytics not available in current API
+                  </p>
                 </div>
               </CardContent>
             </Card>

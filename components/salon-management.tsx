@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
@@ -41,6 +42,10 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
+import { SalonAPI } from "@/lib/services";
+import { ApiError } from "@/lib/utils/apiClient";
+import type { Salon as APISalon } from "@/lib/types/api";
+import { AuthErrorMessage } from "./AuthErrorMessage";
 
 interface Salon {
   id: string;
@@ -57,85 +62,90 @@ interface Salon {
   joinedDate: string;
 }
 
-const salonsData: Salon[] = [
-  {
-    id: "1",
-    name: "Glamour Studio",
-    owner: "Sarah Johnson",
-    location: "New York, NY",
-    status: "active",
-    rating: 4.8,
-    totalBookings: 1247,
-    revenue: 125400,
-    commission: 12540,
-    services: 15,
-    image: "/api/placeholder/40/40",
-    joinedDate: "2023-01-15",
-  },
-  {
-    id: "2",
-    name: "Beauty Haven",
-    owner: "Maria Rodriguez",
-    location: "Los Angeles, CA",
-    status: "active",
-    rating: 4.9,
-    totalBookings: 1891,
-    revenue: 189400,
-    commission: 18940,
-    services: 22,
-    image: "/api/placeholder/40/40",
-    joinedDate: "2023-02-10",
-  },
-  {
-    id: "3",
-    name: "Elegant Touch",
-    owner: "Jennifer Kim",
-    location: "Chicago, IL",
-    status: "pending",
-    rating: 4.6,
-    totalBookings: 876,
-    revenue: 87600,
-    commission: 8760,
-    services: 12,
-    image: "/api/placeholder/40/40",
-    joinedDate: "2023-12-01",
-  },
-  {
-    id: "4",
-    name: "Style & Grace",
-    owner: "Amanda Wilson",
-    location: "Miami, FL",
-    status: "active",
-    rating: 4.7,
-    totalBookings: 1034,
-    revenue: 103400,
-    commission: 10340,
-    services: 18,
-    image: "/api/placeholder/40/40",
-    joinedDate: "2023-03-22",
-  },
-  {
-    id: "5",
-    name: "Urban Chic",
-    owner: "David Chen",
-    location: "Seattle, WA",
-    status: "suspended",
-    rating: 4.2,
-    totalBookings: 567,
-    revenue: 45200,
-    commission: 4520,
-    services: 8,
-    image: "/api/placeholder/40/40",
-    joinedDate: "2023-06-15",
-  },
-];
-
 export function SalonManagement() {
+  const router = useRouter();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [locationFilter, setLocationFilter] = useState("all");
 
-  const filteredSalons = salonsData.filter((salon) => {
+  // API State
+  const [salons, setSalons] = useState<APISalon[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [isAuthError, setIsAuthError] = useState(false);
+
+  useEffect(() => {
+    fetchSalons();
+  }, []);
+
+  const fetchSalons = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      setIsAuthError(false);
+
+      const response = await SalonAPI.getSalons({ page: 1, limit: 100 });
+      setSalons(response.data);
+    } catch (err) {
+      if (err instanceof ApiError) {
+        if (err.status === 401) {
+          setIsAuthError(true);
+        }
+        setError(err.message);
+      } else {
+        setError("Failed to load salons data");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleViewSalon = (salonId: string) => {
+    router.push(`/dashboard/salons/${salonId}`);
+  };
+
+  // Transform API salons to local format
+  const transformedSalons: Salon[] = salons.map((s) => ({
+    id: s.id,
+    name: s.name,
+    owner: s.owner?.name || "Unknown",
+    location: s.address || "Unknown", // Fixed: address is a string, not an object
+    status: s.verified ? "active" : "pending",
+    rating: 4.5, // Default rating since it's not in the API response
+    totalBookings: 0, // Would need separate booking API call
+    revenue: 0, // Would need separate booking API call
+    commission: 0, // Would need separate booking API call
+    services: s.services?.length || 0,
+    image: s.thumbnail || "/api/placeholder/40/40",
+    joinedDate: new Date(s.createdAt).toLocaleDateString(),
+  }));
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4 text-muted-foreground">Loading salons...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    if (isAuthError) {
+      return <AuthErrorMessage onRetry={fetchSalons} />;
+    }
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <p className="text-destructive mb-4">{error}</p>
+          <Button onClick={fetchSalons}>Try Again</Button>
+        </div>
+      </div>
+    );
+  }
+
+  const filteredSalons = transformedSalons.filter((salon) => {
     const matchesSearch =
       salon.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       salon.owner.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -148,20 +158,20 @@ export function SalonManagement() {
     return matchesSearch && matchesStatus && matchesLocation;
   });
 
-  const totalRevenue = salonsData.reduce(
+  const totalRevenue = transformedSalons.reduce(
     (sum, salon) => sum + salon.revenue,
     0
   );
-  const totalCommission = salonsData.reduce(
+  const totalCommission = transformedSalons.reduce(
     (sum, salon) => sum + salon.commission,
     0
   );
-  const activeCount = salonsData.filter(
+  const activeCount = transformedSalons.filter(
     (salon) => salon.status === "active"
   ).length;
   const avgRating =
-    salonsData.reduce((sum, salon) => sum + salon.rating, 0) /
-    salonsData.length;
+    transformedSalons.reduce((sum, salon) => sum + salon.rating, 0) /
+    (transformedSalons.length || 1);
 
   return (
     <div className="space-y-4 sm:space-y-6 p-4 sm:p-6 max-w-full overflow-x-hidden">
@@ -384,7 +394,9 @@ export function SalonManagement() {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => handleViewSalon(salon.id)}
+                        >
                           <Eye className="mr-2 h-4 w-4" />
                           View Details
                         </DropdownMenuItem>
@@ -409,7 +421,7 @@ export function SalonManagement() {
       {/* Pagination */}
       <div className="flex justify-between items-center">
         <p className="text-sm text-muted-foreground">
-          Showing {filteredSalons.length} of {salonsData.length} salons
+          Showing {filteredSalons.length} of {transformedSalons.length} salons
         </p>
         <div className="flex gap-2">
           <Button variant="outline" size="sm" disabled className="rounded-2xl">

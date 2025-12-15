@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { DashboardHeader } from "@/components/dashboard-header";
 import { DashboardSidebar } from "@/components/dashboard-sidebar";
+import ProtectedRoute from "@/components/ProtectedRoute";
 
 export default function DashboardLayout({
   children,
@@ -54,45 +55,47 @@ export default function DashboardLayout({
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <DashboardHeader
-        isDark={isDark}
-        toggleTheme={toggleTheme}
-        toggleSidebar={toggleSidebar}
-        notificationCount={notificationCount}
-      />
-
-      <div className="flex">
-        {/* Sidebar */}
-        <DashboardSidebar
-          isCollapsed={sidebarCollapsed}
-          onToggleCollapse={toggleSidebarCollapse}
-          className={`${
-            sidebarOpen ? "translate-x-0" : "-translate-x-full"
-          } md:translate-x-0`}
+    <ProtectedRoute>
+      <div className="min-h-screen bg-background">
+        {/* Header */}
+        <DashboardHeader
+          isDark={isDark}
+          toggleTheme={toggleTheme}
+          toggleSidebar={toggleSidebar}
+          notificationCount={notificationCount}
         />
 
-        {/* Mobile Sidebar Overlay */}
-        {sidebarOpen && (
-          <div
-            className="fixed inset-0 z-30 bg-black/50 backdrop-blur-sm md:hidden"
-            onClick={() => {
-              setSidebarOpen(false);
-              document.body.style.overflow = "";
-            }}
+        <div className="flex">
+          {/* Sidebar */}
+          <DashboardSidebar
+            isCollapsed={sidebarCollapsed}
+            onToggleCollapse={toggleSidebarCollapse}
+            className={`${
+              sidebarOpen ? "translate-x-0" : "-translate-x-full"
+            } md:translate-x-0`}
           />
-        )}
 
-        {/* Main Content */}
-        <main
-          className={`flex-1 transition-all duration-300 w-full overflow-x-hidden ${
-            sidebarCollapsed ? "md:ml-16" : "md:ml-64"
-          }`}
-        >
-          <div className="min-h-[calc(100vh-4rem)] w-full">{children}</div>
-        </main>
+          {/* Mobile Sidebar Overlay */}
+          {sidebarOpen && (
+            <div
+              className="fixed inset-0 z-30 bg-black/50 backdrop-blur-sm md:hidden"
+              onClick={() => {
+                setSidebarOpen(false);
+                document.body.style.overflow = "";
+              }}
+            />
+          )}
+
+          {/* Main Content */}
+          <main
+            className={`flex-1 transition-all duration-300 w-full overflow-x-hidden ${
+              sidebarCollapsed ? "md:ml-16" : "md:ml-64"
+            }`}
+          >
+            <div className="min-h-[calc(100vh-4rem)] w-full">{children}</div>
+          </main>
+        </div>
       </div>
-    </div>
+    </ProtectedRoute>
   );
 }
