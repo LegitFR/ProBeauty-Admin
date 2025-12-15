@@ -36,6 +36,15 @@ import { SalonAPI, BookingAPI, UserAPI, ApiError } from "@/lib/services";
 import type { Salon, Booking } from "@/lib/types/api";
 import { AuthErrorMessage } from "./AuthErrorMessage";
 
+interface Activity {
+  id: number;
+  type: "booking" | "payment" | "salon" | "review";
+  description: string;
+  time: string;
+  status: string;
+  amount: string | null;
+}
+
 const kpiData = [
   {
     title: "Total Revenue",
@@ -87,10 +96,10 @@ const topServices = [
   { name: "Facial Treatment", value: 18, color: "#FFB380" },
 ];
 
-const recentActivities = [
+const recentActivities: Activity[] = [
   {
     id: 1,
-    type: "booking",
+    type: "booking" as const,
     description: "New booking created at Glamour Studio",
     time: "2 minutes ago",
     status: "pending",
@@ -98,7 +107,7 @@ const recentActivities = [
   },
   {
     id: 2,
-    type: "payment",
+    type: "payment" as const,
     description: "Payment processed for Sarah Johnson",
     time: "5 minutes ago",
     status: "completed",
@@ -106,7 +115,7 @@ const recentActivities = [
   },
   {
     id: 3,
-    type: "salon",
+    type: "salon" as const,
     description: "Beauty Haven salon went live",
     time: "15 minutes ago",
     status: "active",
@@ -114,7 +123,7 @@ const recentActivities = [
   },
   {
     id: 4,
-    type: "review",
+    type: "review" as const,
     description: "5-star review received from customer",
     time: "30 minutes ago",
     status: "positive",
@@ -403,69 +412,69 @@ export function OverviewDashboard() {
         </CardHeader>
         <CardContent className="p-0">
           <div className="space-y-3 sm:space-y-4">
-            {recentActivities.map((activity) => (
-              <div
-                key={activity.id}
-                className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-3 sm:p-4 bg-muted/30 rounded-xl sm:rounded-2xl"
-              >
-                <div className="flex items-start gap-2 sm:gap-3 min-w-0 flex-1">
-                  <div
-                    className={`p-1.5 sm:p-2 rounded-lg sm:rounded-xl flex-shrink-0 ${
-                      activity.type === "booking"
-                        ? "bg-blue-100 text-blue-600"
-                        : activity.type === "payment"
-                        ? "bg-green-100 text-green-600"
-                        : activity.type === "salon"
-                        ? "bg-purple-100 text-purple-600"
-                        : "bg-yellow-100 text-yellow-600"
-                    }`}
-                  >
-                    {activity.type === "booking" && (
-                      <Calendar className="h-3 w-3 sm:h-4 sm:w-4" />
-                    )}
-                    {activity.type === "payment" && (
-                      <DollarSign className="h-3 w-3 sm:h-4 sm:w-4" />
-                    )}
-                    {activity.type === "salon" && (
-                      <Building2 className="h-3 w-3 sm:h-4 sm:w-4" />
-                    )}
-                    {activity.type === "review" && (
-                      <Star className="h-3 w-3 sm:h-4 sm:w-4" />
-                    )}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-sm sm:text-base font-medium line-clamp-2">
-                      {activity.description}
-                    </p>
-                    <div className="flex items-center gap-1.5 sm:gap-2 mt-1">
-                      <Clock className="h-3 w-3 text-muted-foreground flex-shrink-0" />
-                      <span className="text-xs text-muted-foreground">
-                        {activity.time}
-                      </span>
+            {recentActivities.map((activity) => {
+              const iconClass = "h-3 w-3 sm:h-4 sm:w-4";
+              const type = activity.type as Activity["type"];
+
+              let iconBgClass = "";
+              if (type === "booking") iconBgClass = "bg-blue-100 text-blue-600";
+              else if (type === "payment")
+                iconBgClass = "bg-green-100 text-green-600";
+              else if (type === "salon")
+                iconBgClass = "bg-purple-100 text-purple-600";
+              else if (type === "review")
+                iconBgClass = "bg-yellow-100 text-yellow-600";
+
+              return (
+                <div
+                  key={activity.id}
+                  className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-3 sm:p-4 bg-muted/30 rounded-xl sm:rounded-2xl"
+                >
+                  <div className="flex items-start gap-2 sm:gap-3 min-w-0 flex-1">
+                    <div
+                      className={`p-1.5 sm:p-2 rounded-lg sm:rounded-xl flex-shrink-0 ${iconBgClass}`}
+                    >
+                      {type === "booking" && <Calendar className={iconClass} />}
+                      {type === "payment" && (
+                        <DollarSign className={iconClass} />
+                      )}
+                      {type === "salon" && <Building2 className={iconClass} />}
+                      {type === "review" && <Star className={iconClass} />}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm sm:text-base font-medium line-clamp-2">
+                        {activity.description}
+                      </p>
+                      <div className="flex items-center gap-1.5 sm:gap-2 mt-1">
+                        <Clock className="h-3 w-3 text-muted-foreground flex-shrink-0" />
+                        <span className="text-xs text-muted-foreground">
+                          {activity.time}
+                        </span>
+                      </div>
                     </div>
                   </div>
+                  <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-start gap-2 sm:text-right flex-shrink-0">
+                    {activity.amount && (
+                      <p className="text-sm sm:text-base font-medium text-green-600">
+                        {activity.amount}
+                      </p>
+                    )}
+                    <Badge
+                      variant={
+                        activity.status === "completed" ||
+                        activity.status === "active" ||
+                        activity.status === "positive"
+                          ? "default"
+                          : "secondary"
+                      }
+                      className="rounded-full text-xs"
+                    >
+                      {activity.status}
+                    </Badge>
+                  </div>
                 </div>
-                <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-start gap-2 sm:text-right flex-shrink-0">
-                  {activity.amount && (
-                    <p className="text-sm sm:text-base font-medium text-green-600">
-                      {activity.amount}
-                    </p>
-                  )}
-                  <Badge
-                    variant={
-                      activity.status === "completed" ||
-                      activity.status === "active" ||
-                      activity.status === "positive"
-                        ? "default"
-                        : "secondary"
-                    }
-                    className="rounded-full text-xs"
-                  >
-                    {activity.status}
-                  </Badge>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </CardContent>
       </Card>
