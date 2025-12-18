@@ -44,6 +44,25 @@ export default function AuthPage() {
     }
   }, []);
 
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+
+    // Special handling for phone number - only allow digits
+    if (name === "phone") {
+      // Remove any non-digit characters
+      const digitsOnly = value.replace(/\D/g, "");
+      setFormData({ ...formData, [name]: digitsOnly });
+    } else {
+      setFormData({ ...formData, [name]: value });
+    }
+  };
+
+  const validatePhone = (phone: string): boolean => {
+    // Indian phone format: 10 digits starting with 6, 7, 8, or 9
+    const phoneRegex = /^[6-9]\d{9}$/;
+    return phoneRegex.test(phone);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -55,6 +74,16 @@ export default function AuthPage() {
           password: formData.password,
         });
       } else {
+        // Validate phone number before signup
+        if (!validatePhone(formData.phone)) {
+          toast.error(
+            "Invalid phone number. Please enter a 10-digit Indian mobile number starting with 6, 7, 8, or 9",
+            { duration: 5000 }
+          );
+          setIsLoading(false);
+          return;
+        }
+
         await signup({
           name: formData.name,
           email: formData.email,
@@ -88,10 +117,6 @@ export default function AuthPage() {
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   // If showing OTP verification, render that UI
@@ -134,7 +159,7 @@ export default function AuthPage() {
                 maxLength={6}
                 value={otp}
                 onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
-                className="h-14 text-center text-2xl tracking-widest bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:border-[#FF6A00] focus:ring-[#FF6A00] rounded-xl"
+                className="h-14 text-center text-2xl tracking-widest bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-[#1e1e1e] placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:border-[#FF6A00] focus:ring-[#FF6A00] rounded-xl"
                 placeholder="000000"
               />
             </div>
@@ -261,10 +286,15 @@ export default function AuthPage() {
                   required={!isLogin}
                   value={formData.phone}
                   onChange={handleChange}
+                  maxLength={10}
+                  pattern="[6-9][0-9]{9}"
                   className="pl-10 h-12 bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-[#1e1e1e] placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:border-[#FF6A00] focus:ring-[#FF6A00] dark:focus:border-[#FF6A00] dark:focus:ring-[#FF6A00] rounded-xl"
                   placeholder="9876543210"
                 />
               </div>
+              <p className="text-xs text-muted-foreground">
+                Enter 10-digit Indian mobile number (starting with 6-9)
+              </p>
             </div>
           )}
 

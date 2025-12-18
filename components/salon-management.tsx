@@ -35,48 +35,110 @@ import {
   Eye,
   Edit,
   Trash2,
+  Ban,
+  CheckCircle,
+  Phone,
 } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "./ui/dialog";
 import { SalonAPI } from "@/lib/services";
 import { ApiError } from "@/lib/utils/apiClient";
-import type { Salon as APISalon } from "@/lib/types/api";
+import type { Salon as APISalon, PaginationResponse } from "@/lib/types/api";
 import { AuthErrorMessage } from "./AuthErrorMessage";
-
-interface Salon {
-  id: string;
-  name: string;
-  owner: string;
-  location: string;
-  status: "active" | "pending" | "suspended";
-  rating: number;
-  totalBookings: number;
-  revenue: number;
-  commission: number;
-  services: number;
-  image: string;
-  joinedDate: string;
-}
+import { toast } from "sonner";
 
 export function SalonManagement() {
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState<
+    "all" | "active" | "pending"
+  >("all");
   const [locationFilter, setLocationFilter] = useState("all");
 
   // API State
   const [salons, setSalons] = useState<APISalon[]>([]);
+  const [allSalonsStats, setAllSalonsStats] = useState<{
+    total: number;
+    active: number;
+    pending: number;
+    totalServices: number;
+  }>({ total: 0, active: 0, pending: 0, totalServices: 0 });
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pagination, setPagination] = useState<PaginationResponse>({
+    page: 1,
+    limit: 10,
+    total: 0,
+    totalPages: 0,
+  });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isAuthError, setIsAuthError] = useState(false);
 
+  // Delete/Suspend Dialog
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [selectedSalon, setSelectedSalon] = useState<APISalon | null>(null);
+  const [actionLoading, setActionLoading] = useState(false);
+
+  // Fetch overall stats once on mount and when status filter changes
+  useEffect(() => {
+    fetchAllSalonsStats();
+  }, [statusFilter]);
+
+  // Fetch paginated salons when page changes
   useEffect(() => {
     fetchSalons();
-  }, []);
+  }, [currentPage, statusFilter]);
+
+  // Reset to page 1 when status filter changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [statusFilter]);
+
+  const fetchAllSalonsStats = async () => {
+    try {
+      // Fetch all salons for statistics (with high limit)
+      const params: any = {
+        page: 1,
+        limit: 1000, // Get all salons for stats
+      };
+
+      // Add verified filter based on status
+      if (statusFilter === "active") {
+        params.verified = true;
+      } else if (statusFilter === "pending") {
+        params.verified = false;
+      }
+
+      const response = await SalonAPI.getSalons(params);
+
+      // Calculate stats from all salons
+      const allSalons = response.data;
+      setAllSalonsStats({
+        total: response.pagination?.total || allSalons.length,
+        active: allSalons.filter((s) => s.verified).length,
+        pending: allSalons.filter((s) => !s.verified).length,
+        totalServices: allSalons.reduce(
+          (sum, s) => sum + (s.services?.length || 0),
+          0
+        ),
+      });
+    } catch (err) {
+      console.error("Failed to fetch salon stats:", err);
+    }
+  };
 
   const fetchSalons = async () => {
     try {
@@ -84,8 +146,23 @@ export function SalonManagement() {
       setError(null);
       setIsAuthError(false);
 
-      const response = await SalonAPI.getSalons({ page: 1, limit: 100 });
+      const params: any = {
+        page: currentPage,
+        limit: 10,
+      };
+
+      // Add verified filter based on status
+      if (statusFilter === "active") {
+        params.verified = true;
+      } else if (statusFilter === "pending") {
+        params.verified = false;
+      }
+
+      const response = await SalonAPI.getSalons(params);
       setSalons(response.data);
+      if (response.pagination) {
+        setPagination(response.pagination);
+      }
     } catch (err) {
       if (err instanceof ApiError) {
         if (err.status === 401) {
@@ -104,21 +181,85 @@ export function SalonManagement() {
     router.push(`/dashboard/salons/${salonId}`);
   };
 
-  // Transform API salons to local format
-  const transformedSalons: Salon[] = salons.map((s) => ({
-    id: s.id,
-    name: s.name,
-    owner: s.owner?.name || "Unknown",
-    location: s.address || "Unknown", // Fixed: address is a string, not an object
-    status: s.verified ? "active" : "pending",
-    rating: 4.5, // Default rating since it's not in the API response
-    totalBookings: 0, // Would need separate booking API call
-    revenue: 0, // Would need separate booking API call
-    commission: 0, // Would need separate booking API call
-    services: s.services?.length || 0,
-    image: s.thumbnail || "/api/placeholder/40/40",
-    joinedDate: new Date(s.createdAt).toLocaleDateString(),
-  }));
+  const handleEditSalon = (salon: APISalon) => {
+    // Navigate to edit page or open edit dialog
+    router.push(`/dashboard/salons/${salon.id}/edit`);
+  };
+
+  const handleDeleteSalon = async () => {
+    if (!selectedSalon) return;
+
+    setActionLoading(true);
+    try {
+      await SalonAPI.deleteSalon(selectedSalon.id);
+      toast.success(`${selectedSalon.name} has been deleted successfully`);
+      setDeleteDialogOpen(false);
+      setSelectedSalon(null);
+      // Refresh both the list and stats
+      fetchSalons();
+      fetchAllSalonsStats();
+    } catch (err) {
+      if (err instanceof ApiError) {
+        toast.error(err.message);
+      } else {
+        toast.error("Failed to delete salon");
+      }
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const openDeleteDialog = (salon: APISalon) => {
+    setSelectedSalon(salon);
+    setDeleteDialogOpen(true);
+  };
+
+  // Extract unique locations for filter
+  const uniqueLocations = Array.from(
+    new Set(
+      salons
+        .map((s) => {
+          // Extract city from address
+          const addressParts = s.address.split(",");
+          return addressParts.length >= 2
+            ? addressParts[addressParts.length - 2].trim()
+            : "";
+        })
+        .filter(Boolean)
+    )
+  );
+
+  // Filter salons based on search and filters
+  const filteredSalons = salons.filter((salon) => {
+    const matchesSearch =
+      salon.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (salon.owner?.name || "")
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase()) ||
+      salon.address.toLowerCase().includes(searchTerm.toLowerCase());
+
+    const matchesStatus =
+      statusFilter === "all" ||
+      (statusFilter === "active" && salon.verified) ||
+      (statusFilter === "pending" && !salon.verified);
+
+    const matchesLocation =
+      locationFilter === "all" || salon.address.includes(locationFilter);
+
+    return matchesSearch && matchesStatus && matchesLocation;
+  });
+
+  // Calculate statistics from all salons data
+  const stats = {
+    active: allSalonsStats.active,
+    pending: allSalonsStats.pending,
+    total: allSalonsStats.total,
+    totalServices: allSalonsStats.totalServices,
+    avgServicesPerSalon:
+      allSalonsStats.total > 0
+        ? (allSalonsStats.totalServices / allSalonsStats.total).toFixed(1)
+        : "0",
+  };
 
   if (loading) {
     return (
@@ -145,34 +286,6 @@ export function SalonManagement() {
     );
   }
 
-  const filteredSalons = transformedSalons.filter((salon) => {
-    const matchesSearch =
-      salon.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      salon.owner.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      salon.location.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus =
-      statusFilter === "all" || salon.status === statusFilter;
-    const matchesLocation =
-      locationFilter === "all" || salon.location.includes(locationFilter);
-
-    return matchesSearch && matchesStatus && matchesLocation;
-  });
-
-  const totalRevenue = transformedSalons.reduce(
-    (sum, salon) => sum + salon.revenue,
-    0
-  );
-  const totalCommission = transformedSalons.reduce(
-    (sum, salon) => sum + salon.commission,
-    0
-  );
-  const activeCount = transformedSalons.filter(
-    (salon) => salon.status === "active"
-  ).length;
-  const avgRating =
-    transformedSalons.reduce((sum, salon) => sum + salon.rating, 0) /
-    (transformedSalons.length || 1);
-
   return (
     <div className="space-y-4 sm:space-y-6 p-4 sm:p-6 max-w-full overflow-x-hidden">
       {/* Header */}
@@ -180,11 +293,15 @@ export function SalonManagement() {
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold">Salon Management</h1>
           <p className="text-sm sm:text-base text-muted-foreground mt-1">
-            Manage and monitor your partner salons
+            Manage and monitor your partner salons ({stats.total} total,{" "}
+            {stats.active} active, {stats.pending} pending)
           </p>
         </div>
         <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
-          <Button className="bg-primary hover:bg-primary/90 rounded-2xl w-full sm:w-auto">
+          <Button
+            onClick={() => router.push("/dashboard/salons/new")}
+            className="bg-primary hover:bg-primary/90 rounded-2xl w-full sm:w-auto"
+          >
             Add New Salon
           </Button>
         </div>
@@ -196,13 +313,29 @@ export function SalonManagement() {
           <CardContent className="p-0">
             <div className="flex items-center gap-2 sm:gap-3">
               <div className="p-1.5 sm:p-2 bg-green-100 rounded-xl">
-                <Users className="h-4 w-4 sm:h-5 sm:w-5 text-green-600" />
+                <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 text-green-600" />
               </div>
               <div>
                 <p className="text-xs sm:text-sm text-muted-foreground">
                   Active Salons
                 </p>
-                <p className="text-xl sm:text-2xl font-bold">{activeCount}</p>
+                <p className="text-xl sm:text-2xl font-bold">{stats.active}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="p-4 sm:p-6">
+          <CardContent className="p-0">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="p-1.5 sm:p-2 bg-yellow-100 rounded-xl">
+                <Calendar className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-600" />
+              </div>
+              <div>
+                <p className="text-xs sm:text-sm text-muted-foreground">
+                  Pending Verification
+                </p>
+                <p className="text-xl sm:text-2xl font-bold">{stats.pending}</p>
               </div>
             </div>
           </CardContent>
@@ -212,15 +345,13 @@ export function SalonManagement() {
           <CardContent className="p-0">
             <div className="flex items-center gap-2 sm:gap-3">
               <div className="p-1.5 sm:p-2 bg-blue-100 rounded-xl">
-                <DollarSign className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
+                <Users className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
               </div>
               <div>
                 <p className="text-xs sm:text-sm text-muted-foreground">
-                  Total Revenue
+                  Total Salons
                 </p>
-                <p className="text-xl sm:text-2xl font-bold">
-                  ${(totalRevenue / 1000).toFixed(0)}K
-                </p>
+                <p className="text-xl sm:text-2xl font-bold">{stats.total}</p>
               </div>
             </div>
           </CardContent>
@@ -233,29 +364,11 @@ export function SalonManagement() {
                 <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-purple-600" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">
-                  Commission Earned
-                </p>
-                <p className="text-2xl font-bold">
-                  ${(totalCommission / 1000).toFixed(0)}K
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="p-4 sm:p-6">
-          <CardContent className="p-0">
-            <div className="flex items-center gap-2 sm:gap-3">
-              <div className="p-1.5 sm:p-2 bg-yellow-100 rounded-xl">
-                <Star className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-600" />
-              </div>
-              <div>
                 <p className="text-xs sm:text-sm text-muted-foreground">
-                  Avg Rating
+                  Avg Services
                 </p>
                 <p className="text-xl sm:text-2xl font-bold">
-                  {avgRating.toFixed(1)}
+                  {stats.avgServicesPerSalon}
                 </p>
               </div>
             </div>
@@ -275,7 +388,10 @@ export function SalonManagement() {
               className="pl-10"
             />
           </div>
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
+          <Select
+            value={statusFilter}
+            onValueChange={(value: any) => setStatusFilter(value)}
+          >
             <SelectTrigger className="w-full md:w-40">
               <SelectValue placeholder="Status" />
             </SelectTrigger>
@@ -283,7 +399,6 @@ export function SalonManagement() {
               <SelectItem value="all">All Status</SelectItem>
               <SelectItem value="active">Active</SelectItem>
               <SelectItem value="pending">Pending</SelectItem>
-              <SelectItem value="suspended">Suspended</SelectItem>
             </SelectContent>
           </Select>
           <Select value={locationFilter} onValueChange={setLocationFilter}>
@@ -292,17 +407,13 @@ export function SalonManagement() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Locations</SelectItem>
-              <SelectItem value="New York">New York</SelectItem>
-              <SelectItem value="Los Angeles">Los Angeles</SelectItem>
-              <SelectItem value="Chicago">Chicago</SelectItem>
-              <SelectItem value="Miami">Miami</SelectItem>
-              <SelectItem value="Seattle">Seattle</SelectItem>
+              {uniqueLocations.map((location) => (
+                <SelectItem key={location} value={location}>
+                  {location}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
-          <Button variant="outline" className="rounded-2xl">
-            <Filter className="h-4 w-4 mr-2" />
-            More Filters
-          </Button>
         </div>
       </Card>
 
@@ -315,104 +426,121 @@ export function SalonManagement() {
                 <TableHead>Salon</TableHead>
                 <TableHead>Location</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead>Rating</TableHead>
-                <TableHead>Bookings</TableHead>
-                <TableHead>Revenue</TableHead>
-                <TableHead>Commission</TableHead>
+                <TableHead>Phone</TableHead>
+                <TableHead>Services</TableHead>
+                <TableHead>Joined</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredSalons.map((salon) => (
-                <TableRow key={salon.id}>
-                  <TableCell>
-                    <div className="flex items-center gap-3">
-                      <Avatar className="h-10 w-10">
-                        <AvatarImage src={salon.image} alt={salon.name} />
-                        <AvatarFallback>
-                          {salon.name
-                            .split(" ")
-                            .map((n) => n[0])
-                            .join("")}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <p className="font-medium">{salon.name}</p>
-                        <p className="text-sm text-muted-foreground">
-                          {salon.owner}
-                        </p>
-                      </div>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-1">
-                      <MapPin className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm">{salon.location}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge
-                      variant={
-                        salon.status === "active"
-                          ? "default"
-                          : salon.status === "pending"
-                          ? "secondary"
-                          : "destructive"
-                      }
-                      className="rounded-full"
-                    >
-                      {salon.status}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-1">
-                      <Star className="h-4 w-4 text-yellow-500 fill-current" />
-                      <span>{salon.rating}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-1">
-                      <Calendar className="h-4 w-4 text-muted-foreground" />
-                      <span>{salon.totalBookings.toLocaleString()}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <span className="font-medium">
-                      ${salon.revenue.toLocaleString()}
-                    </span>
-                  </TableCell>
-                  <TableCell>
-                    <span className="text-green-600 font-medium">
-                      ${salon.commission.toLocaleString()}
-                    </span>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-8 w-8">
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem
-                          onClick={() => handleViewSalon(salon.id)}
-                        >
-                          <Eye className="mr-2 h-4 w-4" />
-                          View Details
-                        </DropdownMenuItem>
-                        <DropdownMenuItem>
-                          <Edit className="mr-2 h-4 w-4" />
-                          Edit Salon
-                        </DropdownMenuItem>
-                        <DropdownMenuItem className="text-destructive">
-                          <Trash2 className="mr-2 h-4 w-4" />
-                          Suspend
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+              {filteredSalons.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={7} className="text-center py-8">
+                    <p className="text-muted-foreground">
+                      {searchTerm ||
+                      statusFilter !== "all" ||
+                      locationFilter !== "all"
+                        ? "No salons found matching your filters"
+                        : "No salons available"}
+                    </p>
                   </TableCell>
                 </TableRow>
-              ))}
+              ) : (
+                filteredSalons.map((salon) => (
+                  <TableRow key={salon.id}>
+                    <TableCell>
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-10 w-10">
+                          <AvatarImage
+                            src={salon.thumbnail || undefined}
+                            alt={salon.name}
+                          />
+                          <AvatarFallback>
+                            {salon.name
+                              .split(" ")
+                              .map((n) => n[0])
+                              .join("")}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <p className="font-medium">{salon.name}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {salon.owner?.name || "Unknown Owner"}
+                          </p>
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-1">
+                        <MapPin className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-sm max-w-[200px] truncate">
+                          {salon.address}
+                        </span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Badge
+                        variant={salon.verified ? "default" : "secondary"}
+                        className="rounded-full"
+                      >
+                        {salon.verified ? "Active" : "Pending"}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-1">
+                        <Phone className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-sm">{salon.phone || "N/A"}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-1">
+                        <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                        <span>{salon.services?.length || 0}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <span className="text-sm text-muted-foreground">
+                        {new Date(salon.createdAt).toLocaleDateString()}
+                      </span>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
+                          >
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem
+                            onClick={() => handleViewSalon(salon.id)}
+                          >
+                            <Eye className="mr-2 h-4 w-4" />
+                            View Details
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => handleEditSalon(salon)}
+                          >
+                            <Edit className="mr-2 h-4 w-4" />
+                            Edit Salon
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem
+                            className="text-destructive"
+                            onClick={() => openDeleteDialog(salon)}
+                          >
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            Delete Salon
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
             </TableBody>
           </Table>
         </div>
@@ -421,17 +549,67 @@ export function SalonManagement() {
       {/* Pagination */}
       <div className="flex justify-between items-center">
         <p className="text-sm text-muted-foreground">
-          Showing {filteredSalons.length} of {transformedSalons.length} salons
+          Showing {(currentPage - 1) * 10 + 1}-
+          {Math.min(currentPage * 10, pagination.total)} of {pagination.total}{" "}
+          salons
         </p>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" disabled className="rounded-2xl">
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={currentPage === 1 || loading}
+            onClick={() => setCurrentPage((prev) => prev - 1)}
+            className="rounded-2xl"
+          >
             Previous
           </Button>
-          <Button variant="outline" size="sm" className="rounded-2xl">
+          <div className="flex items-center gap-2 px-3">
+            <span className="text-sm">
+              Page {currentPage} of {pagination.totalPages}
+            </span>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={currentPage >= pagination.totalPages || loading}
+            onClick={() => setCurrentPage((prev) => prev + 1)}
+            className="rounded-2xl"
+          >
             Next
           </Button>
         </div>
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Salon</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete{" "}
+              <strong>{selectedSalon?.name}</strong>? This action cannot be
+              undone and will remove all associated data including services,
+              staff, and bookings.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setDeleteDialogOpen(false)}
+              disabled={actionLoading}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleDeleteSalon}
+              disabled={actionLoading}
+            >
+              {actionLoading ? "Deleting..." : "Delete Salon"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
