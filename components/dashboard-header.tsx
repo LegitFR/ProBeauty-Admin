@@ -55,35 +55,39 @@ export function DashboardHeader({
         </Button>
 
         <div className="flex-1 flex items-center gap-2 sm:gap-4 ml-2 sm:ml-4 md:ml-0 min-w-0">
-          <div className="relative max-w-md w-full">
+          <div className="relative max-w-md w-full hidden xs:block">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Search..."
-              className="pl-10 bg-muted/50 text-sm"
+              className="pl-10 bg-muted/50 text-sm h-9 sm:h-10"
             />
           </div>
         </div>
 
-        <div className="flex items-center gap-1.5 sm:gap-2 md:gap-3 flex-shrink-0">
+        <div className="flex items-center gap-1 sm:gap-1.5 md:gap-2 lg:gap-3 flex-shrink-0">
           <Button
             variant="ghost"
             size="icon"
             onClick={toggleTheme}
-            className="rounded-2xl"
+            className="rounded-2xl h-9 w-9 sm:h-10 sm:w-10"
           >
             {isDark ? (
-              <Sun className="h-5 w-5" />
+              <Sun className="h-4 w-4 sm:h-5 sm:w-5" />
             ) : (
-              <Moon className="h-5 w-5" />
+              <Moon className="h-4 w-4 sm:h-5 sm:w-5" />
             )}
           </Button>
 
-          <Button variant="ghost" size="icon" className="relative rounded-2xl">
-            <Bell className="h-5 w-5" />
+          <Button
+            variant="ghost"
+            size="icon"
+            className="relative rounded-2xl h-9 w-9 sm:h-10 sm:w-10"
+          >
+            <Bell className="h-4 w-4 sm:h-5 sm:w-5" />
             {notificationCount > 0 && (
               <Badge
                 variant="destructive"
-                className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs"
+                className="absolute -top-1 -right-1 h-4 w-4 sm:h-5 sm:w-5 rounded-full p-0 flex items-center justify-center text-[10px] sm:text-xs"
               >
                 {notificationCount > 9 ? "9+" : notificationCount}
               </Badge>
@@ -94,9 +98,9 @@ export function DashboardHeader({
             <DropdownMenuTrigger asChild>
               <Button
                 variant="ghost"
-                className="relative h-10 w-10 rounded-2xl"
+                className="relative h-9 w-9 sm:h-10 sm:w-10 rounded-2xl"
               >
-                <Avatar className="h-9 w-9">
+                <Avatar className="h-8 w-8 sm:h-9 sm:w-9">
                   <AvatarImage src="/api/placeholder/32/32" alt="Admin" />
                   <AvatarFallback className="bg-primary text-primary-foreground">
                     {user?.name

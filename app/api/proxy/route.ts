@@ -5,7 +5,17 @@ const BACKEND_URL =
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
+    // Try to parse JSON body, but handle empty body gracefully
+    let body = {};
+    try {
+      const text = await request.text();
+      if (text && text.trim()) {
+        body = JSON.parse(text);
+      }
+    } catch (parseError) {
+      console.log("⚠️ No valid JSON body or empty body, using empty object");
+    }
+
     const path = request.nextUrl.searchParams.get("path") || "";
 
     console.log("🔄 Proxy forwarding to:", `${BACKEND_URL}${path}`);

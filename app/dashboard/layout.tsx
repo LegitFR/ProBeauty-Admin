@@ -88,11 +88,13 @@ export default function DashboardLayout({
 
           {/* Main Content */}
           <main
-            className={`flex-1 transition-all duration-300 w-full overflow-x-hidden ${
-              sidebarCollapsed ? "md:ml-16" : "md:ml-64"
+            className={`flex-1 transition-all duration-300 w-full ${
+              sidebarCollapsed ? "md:pl-16" : "md:pl-64"
             }`}
           >
-            <div className="min-h-[calc(100vh-4rem)] w-full">{children}</div>
+            <div className="min-h-[calc(100vh-4rem)] w-full max-w-full">
+              {children}
+            </div>
           </main>
         </div>
       </div>

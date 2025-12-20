@@ -156,7 +156,7 @@ export function DashboardSidebar({
         </div>
 
         {/* Navigation Items */}
-        <nav className="flex flex-col justify-center px-2 sm:px-3 py-2 sm:py-3 space-y-0.5 sm:space-y-1 space-y-2">
+        <nav className="flex flex-col justify-center px-2 sm:px-3 py-2 sm:py-3 space-y-0.5 sm:space-y-1">
           {sidebarItems.map((item) => {
             const isActive =
               pathname === item.href ||

@@ -179,7 +179,11 @@ export async function post<T>(
   return apiRequest<T>(path, {
     ...options,
     method: "POST",
-    body: isFormData ? body : JSON.stringify(body),
+    body: isFormData
+      ? body
+      : body !== undefined
+      ? JSON.stringify(body)
+      : JSON.stringify({}),
     isFormData,
   });
 }

@@ -78,12 +78,16 @@ export interface BookingUser {
   name: string;
   email: string;
   phone: string;
+  profilePicture?: string;
 }
 
 export interface BookingSalon {
   id: string;
   name: string;
   address: string;
+  phone?: string;
+  thumbnail?: string;
+  verified?: boolean;
 }
 
 export interface BookingService {
@@ -91,6 +95,7 @@ export interface BookingService {
   title: string;
   durationMinutes: number;
   price: string;
+  description?: string;
 }
 
 export interface BookingStaffUser {
@@ -117,6 +122,8 @@ export interface Booking {
   salon: BookingSalon;
   service: BookingService;
   staff: BookingStaff;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface CreateBookingData {
