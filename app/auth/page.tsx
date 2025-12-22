@@ -240,7 +240,7 @@ export default function AuthPage() {
                   required={!isLogin}
                   value={formData.name}
                   onChange={handleChange}
-                  className="pl-9 sm:pl-10 h-11 sm:h-12 text-sm sm:text-base bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-[#1e1e1e] placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:border-[#FF6A00] focus:ring-[#FF6A00] dark:focus:border-[#FF6A00] dark:focus:ring-[#FF6A00] rounded-xl"
+                  className="!pl-12 sm:!pl-14 h-11 sm:h-12 text-sm sm:text-base bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-[#1e1e1e] placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:border-[#FF6A00] focus:ring-[#FF6A00] dark:focus:border-[#FF6A00] dark:focus:ring-[#FF6A00] rounded-xl"
                   placeholder="John Doe"
                 />
               </div>
@@ -263,7 +263,7 @@ export default function AuthPage() {
                 required
                 value={formData.email}
                 onChange={handleChange}
-                className="pl-9 sm:pl-10 h-11 sm:h-12 text-sm sm:text-base bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-[#1e1e1e] dark:text-[#1e1e1e] placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:border-[#FF6A00] focus:ring-[#FF6A00] dark:focus:border-[#FF6A00] dark:focus:ring-[#FF6A00] rounded-xl"
+                className="!pl-10 sm:!pl-12 h-11 sm:h-12 text-sm sm:text-base bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-[#1e1e1e] dark:text-[#1e1e1e] placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:border-[#FF6A00] focus:ring-[#FF6A00] dark:focus:border-[#FF6A00] dark:focus:ring-[#FF6A00] rounded-xl"
                 placeholder="admin@probeauty.com"
               />
             </div>
@@ -288,7 +288,7 @@ export default function AuthPage() {
                   onChange={handleChange}
                   maxLength={10}
                   pattern="[6-9][0-9]{9}"
-                  className="pl-9 sm:pl-10 h-11 sm:h-12 text-sm sm:text-base bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-[#1e1e1e] placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:border-[#FF6A00] focus:ring-[#FF6A00] dark:focus:border-[#FF6A00] dark:focus:ring-[#FF6A00] rounded-xl"
+                  className="!pl-12 sm:!pl-14 h-11 sm:h-12 text-sm sm:text-base bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-[#1e1e1e] placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:border-[#FF6A00] focus:ring-[#FF6A00] dark:focus:border-[#FF6A00] dark:focus:ring-[#FF6A00] rounded-xl"
                   placeholder="9876543210"
                 />
               </div>
@@ -314,7 +314,7 @@ export default function AuthPage() {
                 required
                 value={formData.password}
                 onChange={handleChange}
-                className="pl-9 sm:pl-10 pr-10 h-11 sm:h-12 text-sm sm:text-base bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-[#1e1e1e] placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:border-[#FF6A00] focus:ring-[#FF6A00] dark:focus:border-[#FF6A00] dark:focus:ring-[#FF6A00] rounded-xl"
+                className="!pl-10 sm:!pl-12 !pr-12 h-11 sm:h-12 text-sm sm:text-base bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-[#1e1e1e] placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:border-[#FF6A00] focus:ring-[#FF6A00] dark:focus:border-[#FF6A00] dark:focus:ring-[#FF6A00] rounded-xl"
                 placeholder="••••••••"
               />
               <button

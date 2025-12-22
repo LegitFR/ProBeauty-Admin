@@ -42,12 +42,6 @@ export default function DashboardLayout({
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
-    // Prevent body scroll when sidebar is open on mobile
-    if (!sidebarOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
   };
 
   const toggleSidebarCollapse = () => {
@@ -56,7 +50,7 @@ export default function DashboardLayout({
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-background flex flex-col">
         {/* Header */}
         <DashboardHeader
           isDark={isDark}
@@ -65,7 +59,7 @@ export default function DashboardLayout({
           notificationCount={notificationCount}
         />
 
-        <div className="flex">
+        <div className="flex flex-1 overflow-hidden">
           {/* Sidebar */}
           <DashboardSidebar
             isCollapsed={sidebarCollapsed}
@@ -79,22 +73,17 @@ export default function DashboardLayout({
           {sidebarOpen && (
             <div
               className="fixed inset-0 z-30 bg-black/50 backdrop-blur-sm md:hidden"
-              onClick={() => {
-                setSidebarOpen(false);
-                document.body.style.overflow = "";
-              }}
+              onClick={() => setSidebarOpen(false)}
             />
           )}
 
           {/* Main Content */}
           <main
-            className={`flex-1 transition-all duration-300 w-full ${
+            className={`flex-1 transition-all duration-300 overflow-y-auto ${
               sidebarCollapsed ? "md:pl-16" : "md:pl-64"
             }`}
           >
-            <div className="min-h-[calc(100vh-4rem)] w-full max-w-full">
-              {children}
-            </div>
+            <div className="min-h-full w-full max-w-full">{children}</div>
           </main>
         </div>
       </div>

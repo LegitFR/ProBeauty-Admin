@@ -209,6 +209,22 @@ export function SalonManagement() {
     }
   };
 
+  const handleApproveSalon = async (salon: APISalon) => {
+    try {
+      await SalonAPI.updateSalon(salon.id, { verified: true });
+      toast.success(`${salon.name} has been approved successfully`);
+      // Refresh both the list and stats
+      fetchSalons();
+      fetchAllSalonsStats();
+    } catch (err) {
+      if (err instanceof ApiError) {
+        toast.error(err.message);
+      } else {
+        toast.error("Failed to approve salon");
+      }
+    }
+  };
+
   const openDeleteDialog = (salon: APISalon) => {
     setSelectedSalon(salon);
     setDeleteDialogOpen(true);
@@ -527,6 +543,18 @@ export function SalonManagement() {
                             <Edit className="mr-2 h-4 w-4" />
                             Edit Salon
                           </DropdownMenuItem>
+                          {!salon.verified && (
+                            <>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem
+                                className="text-green-600"
+                                onClick={() => handleApproveSalon(salon)}
+                              >
+                                <CheckCircle className="mr-2 h-4 w-4" />
+                                Approve Salon
+                              </DropdownMenuItem>
+                            </>
+                          )}
                           <DropdownMenuSeparator />
                           <DropdownMenuItem
                             className="text-destructive"

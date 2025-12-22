@@ -117,7 +117,7 @@ export function DashboardSidebar({
   return (
     <aside
       className={cn(
-        "fixed left-0 top-16 z-40 bg-background border-r transition-all duration-300 overflow-y-auto overscroll-contain min-h-screen",
+        "fixed left-0 top-16 z-40 bg-background border-r transition-all duration-300 overflow-y-auto overscroll-contain h-[calc(100vh-4rem)]",
         isCollapsed ? "w-16" : "w-64",
         className
       )}

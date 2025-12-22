@@ -334,6 +334,7 @@ export interface UpdateSalonData {
   hours?: SalonHours | string;
   thumbnail?: File;
   images?: File[];
+  verified?: boolean;
 }
 
 export interface GetSalonsParams extends PaginationParams {
