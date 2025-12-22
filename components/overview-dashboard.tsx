@@ -252,7 +252,7 @@ export function OverviewDashboard() {
   return (
     <div className="space-y-4 sm:space-y-6 p-4 sm:p-6 max-w-full overflow-x-hidden">
       {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+      <div className="flex flex-col gap-4">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
             Dashboard Overview
@@ -261,11 +261,11 @@ export function OverviewDashboard() {
             Welcome back! Here's what's happening with your beauty platform.
           </p>
         </div>
-        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
-          <Button variant="outline" className="rounded-2xl w-full sm:w-auto">
+        <div className="flex flex-wrap gap-2 sm:gap-3">
+          <Button variant="outline" className="rounded-2xl">
             Export Report
           </Button>
-          <Button className="bg-primary hover:bg-primary/90 rounded-2xl w-full sm:w-auto">
+          <Button className="bg-primary hover:bg-primary/90 rounded-2xl">
             Add New Salon
           </Button>
         </div>

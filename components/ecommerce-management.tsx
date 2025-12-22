@@ -60,7 +60,7 @@ import {
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
-import { ProductAPI } from "@/lib/services";
+import { ProductAPI, SalonAPI } from "@/lib/services";
 import { ApiError } from "@/lib/utils/apiClient";
 import type { Product as APIProduct } from "@/lib/types/api";
 import { AuthErrorMessage } from "./AuthErrorMessage";
@@ -103,9 +103,27 @@ export function ECommerceManagement() {
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const [isNewProductOpen, setIsNewProductOpen] = useState(false);
+  const [isEditProductOpen, setIsEditProductOpen] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<APIProduct | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deletingProductId, setDeletingProductId] = useState<string | null>(
+    null
+  );
+
+  // Form state for add/edit product
+  const [formData, setFormData] = useState({
+    salonId: "",
+    title: "",
+    sku: "",
+    price: "",
+    quantity: "",
+    images: [] as File[],
+  });
+  const [formLoading, setFormLoading] = useState(false);
 
   // API State
   const [products, setProducts] = useState<APIProduct[]>([]);
+  const [salonNames, setSalonNames] = useState<Map<string, string>>(new Map());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isAuthError, setIsAuthError] = useState(false);
@@ -122,6 +140,25 @@ export function ECommerceManagement() {
 
       const response = await ProductAPI.getProducts({ page: 1, limit: 100 });
       setProducts(response.data);
+
+      // Fetch salon names for all unique salonIds
+      const uniqueSalonIds = [...new Set(response.data.map((p) => p.salonId))];
+      const salonNamesMap = new Map<string, string>();
+
+      await Promise.all(
+        uniqueSalonIds.map(async (salonId) => {
+          try {
+            const salonResponse = await SalonAPI.getSalonById(salonId);
+            salonNamesMap.set(salonId, salonResponse.data.name);
+          } catch (err) {
+            // If salon fetch fails, keep the ID
+            console.error(`Failed to fetch salon ${salonId}:`, err);
+            salonNamesMap.set(salonId, `Salon ID: ${salonId}`);
+          }
+        })
+      );
+
+      setSalonNames(salonNamesMap);
     } catch (err) {
       if (err instanceof ApiError) {
         if (err.status === 401) {
@@ -136,17 +173,137 @@ export function ECommerceManagement() {
     }
   };
 
+  const resetForm = () => {
+    setFormData({
+      salonId: "",
+      title: "",
+      sku: "",
+      price: "",
+      quantity: "",
+      images: [],
+    });
+  };
+
+  const handleAddProduct = async () => {
+    if (
+      !formData.title ||
+      !formData.sku ||
+      !formData.price ||
+      !formData.quantity ||
+      !formData.salonId
+    ) {
+      alert("Please fill in all required fields");
+      return;
+    }
+
+    try {
+      setFormLoading(true);
+      await ProductAPI.createProduct({
+        salonId: formData.salonId,
+        title: formData.title,
+        sku: formData.sku,
+        price: formData.price,
+        quantity: formData.quantity,
+        images: formData.images.length > 0 ? formData.images : undefined,
+      });
+
+      setIsNewProductOpen(false);
+      resetForm();
+      await fetchProducts();
+    } catch (err) {
+      if (err instanceof ApiError) {
+        alert(`Failed to add product: ${err.message}`);
+      } else {
+        alert("Failed to add product");
+      }
+    } finally {
+      setFormLoading(false);
+    }
+  };
+
+  const handleEditProduct = async () => {
+    if (!editingProduct) return;
+
+    try {
+      setFormLoading(true);
+      await ProductAPI.updateProduct(editingProduct.id, {
+        title: formData.title || undefined,
+        sku: formData.sku || undefined,
+        price: formData.price || undefined,
+        quantity: formData.quantity || undefined,
+        images: formData.images.length > 0 ? formData.images : undefined,
+      });
+
+      setIsEditProductOpen(false);
+      setEditingProduct(null);
+      resetForm();
+      await fetchProducts();
+    } catch (err) {
+      if (err instanceof ApiError) {
+        alert(`Failed to update product: ${err.message}`);
+      } else {
+        alert("Failed to update product");
+      }
+    } finally {
+      setFormLoading(false);
+    }
+  };
+
+  const handleDeleteProduct = async (productId: string) => {
+    if (!confirm("Are you sure you want to delete this product?")) return;
+
+    try {
+      setIsDeleting(true);
+      setDeletingProductId(productId);
+      await ProductAPI.deleteProduct(productId);
+      await fetchProducts();
+    } catch (err) {
+      if (err instanceof ApiError) {
+        alert(`Failed to delete product: ${err.message}`);
+      } else {
+        alert("Failed to delete product");
+      }
+    } finally {
+      setIsDeleting(false);
+      setDeletingProductId(null);
+    }
+  };
+
+  const openEditDialog = (product: APIProduct) => {
+    setEditingProduct(product);
+    setFormData({
+      salonId: product.salonId,
+      title: product.title,
+      sku: product.sku,
+      price: product.price.toString(),
+      quantity: product.quantity.toString(),
+      images: [],
+    });
+    setIsEditProductOpen(true);
+  };
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      setFormData({ ...formData, images: Array.from(e.target.files) });
+    }
+  };
+
   // Transform API products to local format
   const transformedProducts: Product[] = products.map((p) => {
     // Determine stock status
     let status: "active" | "inactive" | "out-of-stock" = "active";
     if (p.quantity === 0) status = "out-of-stock";
 
+    // Get salon name from the map, fallback to "No Salon" if not found
+    const salonName = p.salonId
+      ? salonNames.get(p.salonId) || "Loading..."
+      : "No Salon";
+
     return {
       id: p.id,
       name: p.title,
       category: "Uncategorized", // Not in API
-      brand: "Unknown", // Not in API
+      brand: salonName, // Display actual salon name
       price: p.price,
       salePrice: undefined, // Not in API
       stock: p.quantity,
@@ -248,7 +405,7 @@ export function ECommerceManagement() {
 
   return (
     <div className="space-y-4 sm:space-y-6 p-4 sm:p-6 max-w-full overflow-x-hidden">
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+      <div className="flex flex-col gap-4">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-3">
             <ShoppingCart className="h-8 w-8 text-primary" />
@@ -258,12 +415,18 @@ export function ECommerceManagement() {
             Manage products, inventory, orders, and online sales
           </p>
         </div>
-        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
-          <Button variant="outline" className="rounded-2xl w-full sm:w-auto">
+        <div className="flex flex-wrap gap-2 sm:gap-3">
+          <Button variant="outline" className="rounded-2xl">
             <Download className="h-4 w-4 mr-2" />
             Export Data
           </Button>
-          <Dialog open={isNewProductOpen} onOpenChange={setIsNewProductOpen}>
+          <Dialog
+            open={isNewProductOpen}
+            onOpenChange={(open) => {
+              setIsNewProductOpen(open);
+              if (!open) resetForm();
+            }}
+          >
             <DialogTrigger asChild>
               <Button className="bg-primary hover:bg-primary/90 rounded-2xl">
                 <Plus className="h-4 w-4 mr-2" />
@@ -274,105 +437,239 @@ export function ECommerceManagement() {
               <DialogHeader>
                 <DialogTitle>Add New Product</DialogTitle>
               </DialogHeader>
-              <div className="grid grid-cols-2 gap-6 py-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 py-4">
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <Label>Product Name</Label>
-                    <Input placeholder="Enter product name" />
+                    <Label>Salon ID *</Label>
+                    <Input
+                      placeholder="Enter salon ID"
+                      value={formData.salonId}
+                      onChange={(e) =>
+                        setFormData({ ...formData, salonId: e.target.value })
+                      }
+                    />
                   </div>
                   <div className="space-y-2">
-                    <Label>Brand</Label>
-                    <Input placeholder="Enter brand name" />
+                    <Label>Product Name *</Label>
+                    <Input
+                      placeholder="Enter product name"
+                      value={formData.title}
+                      onChange={(e) =>
+                        setFormData({ ...formData, title: e.target.value })
+                      }
+                    />
                   </div>
                   <div className="space-y-2">
-                    <Label>Category</Label>
-                    <Select>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select category" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="hair-care">Hair Care</SelectItem>
-                        <SelectItem value="skin-care">Skin Care</SelectItem>
-                        <SelectItem value="makeup-tools">
-                          Makeup Tools
-                        </SelectItem>
-                        <SelectItem value="nail-care">Nail Care</SelectItem>
-                        <SelectItem value="tools">Tools & Equipment</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <Label>SKU *</Label>
+                    <Input
+                      placeholder="Enter SKU"
+                      value={formData.sku}
+                      onChange={(e) =>
+                        setFormData({ ...formData, sku: e.target.value })
+                      }
+                    />
                   </div>
                   <div className="space-y-2">
-                    <Label>SKU</Label>
-                    <Input placeholder="Enter SKU" />
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label>Price ($)</Label>
-                      <Input type="number" placeholder="0.00" />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Sale Price ($)</Label>
-                      <Input type="number" placeholder="0.00" />
-                    </div>
+                    <Label>Price ($) *</Label>
+                    <Input
+                      type="number"
+                      placeholder="0.00"
+                      value={formData.price}
+                      onChange={(e) =>
+                        setFormData({ ...formData, price: e.target.value })
+                      }
+                    />
                   </div>
                 </div>
 
                 <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label>Stock Quantity</Label>
-                      <Input type="number" placeholder="0" />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Low Stock Alert</Label>
-                      <Input type="number" placeholder="10" />
-                    </div>
+                  <div className="space-y-2">
+                    <Label>Stock Quantity *</Label>
+                    <Input
+                      type="number"
+                      placeholder="0"
+                      value={formData.quantity}
+                      onChange={(e) =>
+                        setFormData({ ...formData, quantity: e.target.value })
+                      }
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label>Product Images</Label>
                     <div className="border-2 border-dashed border-muted-foreground/25 rounded-xl p-6 text-center">
                       <ImageIcon className="h-12 w-12 text-muted-foreground mx-auto mb-2" />
                       <p className="text-sm text-muted-foreground mb-2">
-                        Upload product images
+                        {formData.images.length > 0
+                          ? `${formData.images.length} file(s) selected`
+                          : "Upload product images"}
                       </p>
-                      <Button variant="outline" size="sm">
+                      <Input
+                        type="file"
+                        multiple
+                        accept="image/*"
+                        onChange={handleImageUpload}
+                        className="hidden"
+                        id="product-images"
+                      />
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        type="button"
+                        onClick={() =>
+                          document.getElementById("product-images")?.click()
+                        }
+                      >
                         <Upload className="h-4 w-4 mr-2" />
                         Choose Files
                       </Button>
                     </div>
                   </div>
-                  <div className="space-y-2">
-                    <Label>Tags</Label>
-                    <Input placeholder="Enter tags separated by commas" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Status</Label>
-                    <Select>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select status" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="active">Active</SelectItem>
-                        <SelectItem value="inactive">Inactive</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-
-                <div className="col-span-2 space-y-2">
-                  <Label>Description</Label>
-                  <Textarea placeholder="Enter product description" rows={4} />
                 </div>
               </div>
               <div className="flex justify-end gap-3">
                 <Button
                   variant="outline"
-                  onClick={() => setIsNewProductOpen(false)}
+                  onClick={() => {
+                    setIsNewProductOpen(false);
+                    resetForm();
+                  }}
+                  disabled={formLoading}
                 >
                   Cancel
                 </Button>
-                <Button className="bg-primary hover:bg-primary/90">
-                  Add Product
+                <Button
+                  className="bg-primary hover:bg-primary/90"
+                  onClick={handleAddProduct}
+                  disabled={formLoading}
+                >
+                  {formLoading ? "Adding..." : "Add Product"}
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+
+          {/* Edit Product Dialog */}
+          <Dialog
+            open={isEditProductOpen}
+            onOpenChange={(open) => {
+              setIsEditProductOpen(open);
+              if (!open) {
+                setEditingProduct(null);
+                resetForm();
+              }
+            }}
+          >
+            <DialogContent className="max-w-[95vw] sm:max-w-4xl max-h-[90vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>Edit Product</DialogTitle>
+              </DialogHeader>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 py-4">
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label>Salon ID</Label>
+                    <Input
+                      placeholder="Enter salon ID"
+                      value={formData.salonId}
+                      disabled
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Product Name</Label>
+                    <Input
+                      placeholder="Enter product name"
+                      value={formData.title}
+                      onChange={(e) =>
+                        setFormData({ ...formData, title: e.target.value })
+                      }
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>SKU</Label>
+                    <Input
+                      placeholder="Enter SKU"
+                      value={formData.sku}
+                      onChange={(e) =>
+                        setFormData({ ...formData, sku: e.target.value })
+                      }
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Price ($)</Label>
+                    <Input
+                      type="number"
+                      placeholder="0.00"
+                      value={formData.price}
+                      onChange={(e) =>
+                        setFormData({ ...formData, price: e.target.value })
+                      }
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label>Stock Quantity</Label>
+                    <Input
+                      type="number"
+                      placeholder="0"
+                      value={formData.quantity}
+                      onChange={(e) =>
+                        setFormData({ ...formData, quantity: e.target.value })
+                      }
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Product Images</Label>
+                    <div className="border-2 border-dashed border-muted-foreground/25 rounded-xl p-6 text-center">
+                      <ImageIcon className="h-12 w-12 text-muted-foreground mx-auto mb-2" />
+                      <p className="text-sm text-muted-foreground mb-2">
+                        {formData.images.length > 0
+                          ? `${formData.images.length} file(s) selected`
+                          : "Upload new images"}
+                      </p>
+                      <Input
+                        type="file"
+                        multiple
+                        accept="image/*"
+                        onChange={handleImageUpload}
+                        className="hidden"
+                        id="edit-product-images"
+                      />
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        type="button"
+                        onClick={() =>
+                          document
+                            .getElementById("edit-product-images")
+                            ?.click()
+                        }
+                      >
+                        <Upload className="h-4 w-4 mr-2" />
+                        Choose Files
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="flex justify-end gap-3">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setIsEditProductOpen(false);
+                    setEditingProduct(null);
+                    resetForm();
+                  }}
+                  disabled={formLoading}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  className="bg-primary hover:bg-primary/90"
+                  onClick={handleEditProduct}
+                  disabled={formLoading}
+                >
+                  {formLoading ? "Updating..." : "Update Product"}
                 </Button>
               </div>
             </DialogContent>
@@ -629,7 +926,17 @@ export function ECommerceManagement() {
                       </div>
 
                       <div className="flex items-center gap-2 pt-2">
-                        <Button variant="outline" size="sm" className="flex-1">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="flex-1"
+                          onClick={() => {
+                            const apiProduct = products.find(
+                              (p) => p.id === product.id
+                            );
+                            if (apiProduct) openEditDialog(apiProduct);
+                          }}
+                        >
                           <Edit3 className="h-4 w-4 mr-1" />
                           Edit
                         </Button>
@@ -652,9 +959,17 @@ export function ECommerceManagement() {
                               <Zap className="h-4 w-4 mr-2" />
                               Promote
                             </DropdownMenuItem>
-                            <DropdownMenuItem className="text-red-600">
+                            <DropdownMenuItem
+                              className="text-red-600"
+                              onClick={() => handleDeleteProduct(product.id)}
+                              disabled={
+                                isDeleting && deletingProductId === product.id
+                              }
+                            >
                               <Trash2 className="h-4 w-4 mr-2" />
-                              Delete
+                              {isDeleting && deletingProductId === product.id
+                                ? "Deleting..."
+                                : "Delete"}
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>

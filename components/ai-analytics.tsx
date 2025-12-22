@@ -129,7 +129,7 @@ export function AIAnalytics() {
   return (
     <div className="space-y-4 sm:space-y-6 p-4 sm:p-6 max-w-full overflow-x-hidden">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+      <div className="flex flex-col gap-4">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-3">
             <Brain className="h-8 w-8 text-primary" />
@@ -139,12 +139,12 @@ export function AIAnalytics() {
             Machine learning powered insights for business optimization
           </p>
         </div>
-        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
-          <Button variant="outline" className="rounded-2xl w-full sm:w-auto">
+        <div className="flex flex-wrap gap-2 sm:gap-3">
+          <Button variant="outline" className="rounded-2xl">
             <Zap className="h-4 w-4 mr-2" />
             Train Models
           </Button>
-          <Button className="bg-primary hover:bg-primary/90 rounded-2xl w-full sm:w-auto">
+          <Button className="bg-primary hover:bg-primary/90 rounded-2xl">
             <Sparkles className="h-4 w-4 mr-2" />
             Generate Report
           </Button>
