@@ -8,6 +8,7 @@ Quick reference for all available API functions.
 import {
   AddressAPI,
   BookingAPI,
+  OrderAPI,
   ProductAPI,
   SalonAPI,
   ServiceAPI,
@@ -46,7 +47,22 @@ import {
 
 ---
 
-## 🛍️ Product API
+## � Order API
+
+| Function                      | Parameters                          | Returns         | Auth       |
+| ----------------------------- | ----------------------------------- | --------------- | ---------- |
+| `createOrder(data)`           | `CreateOrderData`                   | `OrderDetail`   | ✅         |
+| `getAllOrders(params?)`       | `GetOrdersParams?`                  | `OrderDetail[]` | ✅         |
+| `getAllOrdersAdmin(params?)`  | `GetOrdersParams?`                  | `OrderDetail[]` | ✅ (Admin) |
+| `getOrderById(id)`            | `id: string`                        | `OrderDetail`   | ✅         |
+| `updateOrderStatus(id, data)` | `id: string, UpdateOrderStatusData` | `OrderDetail`   | ✅         |
+| `cancelOrder(id)`             | `id: string`                        | `OrderDetail`   | ✅         |
+
+**Note:** `getAllOrdersAdmin()` requires admin role and returns orders across all users and salons.
+
+---
+
+## �🛍️ Product API
 
 | Function                               | Parameters                            | Returns     | Auth |
 | -------------------------------------- | ------------------------------------- | ----------- | ---- |
@@ -129,6 +145,17 @@ import {
   status?: "PENDING" | "CONFIRMED" | "COMPLETED" | "CANCELLED" | "NO_SHOW";
   startDate?: string;  // ISO 8601
   endDate?: string;    // ISO 8601
+}
+```
+
+### Order Filters
+
+```typescript
+{
+  page?: number;
+  limit?: number;
+  status?: "PENDING" | "PAYMENT_PENDING" | "PAYMENT_FAILED" | "CONFIRMED" | "SHIPPED" | "DELIVERED" | "CANCELLED";
+  salonId?: string;
 }
 ```
 
@@ -231,6 +258,20 @@ console.log(`Showing ${page1.data.length} of ${page1.pagination.total}`);
 const verified = await SalonAPI.getSalons({ verified: true });
 const inStock = await ProductAPI.getProducts({ inStock: true });
 const confirmed = await BookingAPI.getBookings({ status: "CONFIRMED" });
+
+// Get all orders as admin with filters
+const allOrders = await OrderAPI.getAllOrdersAdmin({
+  page: 1,
+  limit: 20,
+});
+
+// Get confirmed orders for a specific salon
+const salonOrders = await OrderAPI.getAllOrdersAdmin({
+  status: "CONFIRMED",
+  salonId: "clx1salon12345678",
+  page: 1,
+  limit: 20,
+});
 ```
 
 ---

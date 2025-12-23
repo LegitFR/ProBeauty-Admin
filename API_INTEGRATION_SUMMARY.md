@@ -45,6 +45,14 @@ All services are in `lib/services/`:
   - Get availability slots
   - Confirm and complete bookings
 
+- **orderService.ts** - Order management (7 functions)
+
+  - Create orders from cart
+  - Get user orders and admin orders
+  - Update order status
+  - Cancel orders
+  - Admin-specific order management
+
 - **productService.ts** - Product management (6 functions)
 
   - CRUD operations with image upload support

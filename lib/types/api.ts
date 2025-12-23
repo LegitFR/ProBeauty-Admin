@@ -536,3 +536,68 @@ export interface ChangeEmailConfirmData {
   newEmail: string;
   otp: string;
 }
+
+// ==================== Order Types ====================
+
+export type OrderStatus =
+  | "PENDING"
+  | "PAYMENT_PENDING"
+  | "PAYMENT_FAILED"
+  | "CONFIRMED"
+  | "SHIPPED"
+  | "DELIVERED"
+  | "CANCELLED";
+
+export interface OrderProduct {
+  id: string;
+  salonId: string;
+  title: string;
+  sku: string;
+  price: string;
+  quantity: number;
+  images: string[];
+}
+
+export interface OrderItemDetail {
+  id: string;
+  orderId: string;
+  productId: string;
+  quantity: number;
+  unitPrice: string;
+  product: OrderProduct;
+}
+
+export interface OrderSalon {
+  id: string;
+  ownerId: string;
+  name: string;
+  address: string;
+  verified: boolean;
+}
+
+export interface OrderDetail {
+  id: string;
+  userId: string;
+  salonId: string;
+  total: string;
+  status: OrderStatus;
+  notes?: string;
+  createdAt: string;
+  updatedAt?: string;
+  orderItems: OrderItemDetail[];
+  salon?: OrderSalon;
+}
+
+export interface CreateOrderData {
+  addressId: string;
+  notes?: string;
+}
+
+export interface UpdateOrderStatusData {
+  status: OrderStatus;
+}
+
+export interface GetOrdersParams extends PaginationParams {
+  status?: OrderStatus;
+  salonId?: string;
+}

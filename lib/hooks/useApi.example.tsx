@@ -349,6 +349,79 @@ function CreateBookingForm() {
   );
 }
 
+/**
+ * Example: Hook for fetching admin orders with filters
+ * Admin-only hook to fetch all orders across users and salons
+ */
+export function useAdminOrders(filters?: {
+  status?: string;
+  salonId?: string;
+  page?: number;
+  limit?: number;
+}) {
+  const [orders, setOrders] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [pagination, setPagination] = useState<any>(null);
+
+  const fetchOrders = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const { OrderAPI } = await import("@/lib/services");
+      const response = await OrderAPI.getAllOrdersAdmin(filters as any);
+      setOrders(response.data);
+      setPagination(response.pagination);
+    } catch (err) {
+      if (err instanceof ApiError) {
+        setError(err.message);
+      } else {
+        setError("Failed to fetch orders");
+      }
+    } finally {
+      setLoading(false);
+    }
+  }, [filters?.status, filters?.salonId, filters?.page, filters?.limit]);
+
+  useEffect(() => {
+    fetchOrders();
+  }, [fetchOrders]);
+
+  return { orders, loading, error, pagination, refetch: fetchOrders };
+}
+
+/**
+ * Example: Hook for updating order status
+ */
+export function useUpdateOrderStatus() {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const updateStatus = async (orderId: string, status: string) => {
+    try {
+      setLoading(true);
+      setError(null);
+      const { OrderAPI } = await import("@/lib/services");
+      const response = await OrderAPI.updateOrderStatus(orderId, {
+        status,
+      } as any);
+      return response.data;
+    } catch (err) {
+      if (err instanceof ApiError) {
+        setError(err.message);
+        throw err;
+      } else {
+        setError("Failed to update order status");
+        throw new Error("Failed to update order status");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return { updateStatus, loading, error };
+}
+
 // Example 4: Using pagination hook
 function ProductsList() {
   const {
@@ -359,27 +432,27 @@ function ProductsList() {
     totalPages,
     nextPage,
     prevPage,
-  } = usePaginatedData(
-    async (page, limit) => {
-      const { ProductAPI } = await import("@/lib/services");
-      return ProductAPI.getProducts({ page, limit });
-    }
-  );
+  } = usePaginatedData(async (page, limit) => {
+    const { ProductAPI } = await import("@/lib/services");
+    return ProductAPI.getProducts({ page, limit });
+  });
 
   if (loading) return <div>Loading...</div>;
   if (error) return <div>Error: {error}</div>;
 
   return (
     <div>
-      {products.map(product => (
+      {products.map((product: any) => (
         <div key={product.id}>{product.title}</div>
       ))}
-      
+
       <div className="pagination">
         <button onClick={prevPage} disabled={page === 1}>
           Previous
         </button>
-        <span>Page {page} of {totalPages}</span>
+        <span>
+          Page {page} of {totalPages}
+        </span>
         <button onClick={nextPage} disabled={page === totalPages}>
           Next
         </button>
@@ -388,4 +461,70 @@ function ProductsList() {
   );
 }
 
-*/
+// Example 5: Using admin orders hook
+function AdminOrdersDashboard() {
+  const [statusFilter, setStatusFilter] = useState<string>("");
+  const [salonFilter, setSalonFilter] = useState<string>("");
+
+  const { orders, loading, error, pagination, refetch } = useAdminOrders({
+    status: statusFilter || undefined,
+    salonId: salonFilter || undefined,
+    page: 1,
+    limit: 20,
+  });
+
+  const { updateStatus } = useUpdateOrderStatus();
+
+  const handleStatusChange = async (orderId: string, newStatus: string) => {
+    try {
+      await updateStatus(orderId, newStatus);
+      refetch(); // Refresh the orders list
+    } catch (err) {
+      console.error("Failed to update order status");
+    }
+  };
+
+  if (loading) return <div>Loading orders...</div>;
+  if (error) return <div>Error: {error}</div>;
+
+  return (
+    <div>
+      <div className="filters">
+        <select
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+        >
+          <option value="">All Statuses</option>
+          <option value="PENDING">Pending</option>
+          <option value="CONFIRMED">Confirmed</option>
+          <option value="SHIPPED">Shipped</option>
+          <option value="DELIVERED">Delivered</option>
+        </select>
+
+        <input
+          type="text"
+          placeholder="Filter by Salon ID"
+          value={salonFilter}
+          onChange={(e) => setSalonFilter(e.target.value)}
+        />
+      </div>
+
+      {orders.map((order) => (
+        <div key={order.id}>
+          <h3>Order #{order.id}</h3>
+          <p>Status: {order.status}</p>
+          <p>Total: ${order.total}</p>
+          <button onClick={() => handleStatusChange(order.id, "SHIPPED")}>
+            Mark as Shipped
+          </button>
+        </div>
+      ))}
+
+      {pagination && (
+        <div>
+          Showing {orders.length} of {pagination.total} orders
+        </div>
+      )}
+    </div>
+  );
+}

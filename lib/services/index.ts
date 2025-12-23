@@ -9,6 +9,9 @@ export * as AddressAPI from "./addressService";
 // Booking API
 export * as BookingAPI from "./bookingService";
 
+// Order API
+export * as OrderAPI from "./orderService";
+
 // Product API
 export * as ProductAPI from "./productService";
 
