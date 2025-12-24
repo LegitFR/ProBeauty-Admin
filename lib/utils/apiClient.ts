@@ -6,8 +6,10 @@
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL || "https://probeauty-backend.onrender.com";
 
-// Use proxy in development to bypass CORS
-const USE_PROXY = process.env.NODE_ENV === "development";
+// ALWAYS use proxy to bypass CORS issues
+// The Next.js API route runs server-side and can call any backend without CORS restrictions
+// This eliminates the need for backend CORS configuration or Vercel environment variables
+const USE_PROXY = true;
 
 export interface RequestOptions extends RequestInit {
   requiresAuth?: boolean;
@@ -37,13 +39,9 @@ function getAccessToken(): string | null {
  * Build the request URL
  */
 function buildUrl(path: string): string {
-  if (USE_PROXY) {
-    // Use Next.js API proxy in development
-    return `/api/proxy?path=${encodeURIComponent(path)}`;
-  } else {
-    // Direct call in production
-    return `${API_BASE_URL}${path}`;
-  }
+  // Always use Next.js API proxy to avoid CORS issues
+  // The proxy route handles all HTTP methods and forwards auth headers
+  return `/api/proxy?path=${encodeURIComponent(path)}`;
 }
 
 /**
@@ -82,6 +80,16 @@ export async function apiRequest<T>(
   try {
     const response = await fetch(url, config);
 
+    // Log request details for debugging
+    if (process.env.NODE_ENV === "development") {
+      console.log("🌐 API Request:", {
+        method: fetchOptions.method,
+        url,
+        hasAuth: !!headers["Authorization"],
+        status: response.status,
+      });
+    }
+
     // Parse response
     const contentType = response.headers.get("content-type");
     let data: any;
@@ -95,6 +103,17 @@ export async function apiRequest<T>(
 
     // Handle error responses
     if (!response.ok) {
+      // Log error details for debugging
+      if (process.env.NODE_ENV === "development") {
+        console.error("❌ API Error:", {
+          status: response.status,
+          url,
+          method: fetchOptions.method,
+          message: data.message,
+          hasAuth: !!headers["Authorization"],
+        });
+      }
+
       // Handle 401 Unauthorized - clear token and redirect to login
       // But ONLY if we're not on the auth page (to avoid interfering with login)
       if (response.status === 401) {
@@ -135,16 +154,13 @@ export async function apiRequest<T>(
     if (error.message === "Failed to fetch" || error.name === "TypeError") {
       console.error("❌ Network request failed!");
       console.error("URL:", url);
-
-      if (!USE_PROXY) {
-        console.error(
-          "💡 TIP: CORS error detected. Enable proxy in development."
-        );
-      }
+      console.error(
+        "💡 This might be a network connectivity issue or the backend server is down."
+      );
 
       throw new ApiError(
         0,
-        "Network request failed. Please check your connection."
+        "Network request failed. Please check your connection or try again later."
       );
     }
 
