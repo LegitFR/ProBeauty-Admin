@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
@@ -132,6 +133,7 @@ const recentActivities: Activity[] = [
 ];
 
 export function OverviewDashboard() {
+  const router = useRouter();
   const [salons, setSalons] = useState<Salon[]>([]);
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
@@ -404,7 +406,8 @@ export function OverviewDashboard() {
             <Button
               variant="outline"
               size="sm"
-              className="rounded-2xl w-full sm:w-auto"
+              className="rounded-2xl"
+              onClick={() => router.push("/dashboard/bookings")}
             >
               View All
             </Button>

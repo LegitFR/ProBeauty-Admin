@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 import {
   BarChart3,
   Building2,
@@ -21,12 +22,13 @@ import {
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
 import { cn } from "./ui/utils";
+import { BookingAPI } from "@/lib/services";
 
 interface SidebarItem {
   id: string;
   label: string;
   icon: React.ComponentType<{ className?: string }>;
-  badge?: number;
+  badge?: number | null;
   href: string;
 }
 
@@ -36,7 +38,9 @@ interface DashboardSidebarProps {
   className?: string;
 }
 
-const sidebarItems: SidebarItem[] = [
+const sidebarItems: (Omit<SidebarItem, "badge"> & {
+  badgeType?: "pending-bookings" | "notifications";
+})[] = [
   { id: "overview", label: "Overview", icon: BarChart3, href: "/dashboard" },
   {
     id: "salons",
@@ -54,7 +58,7 @@ const sidebarItems: SidebarItem[] = [
     id: "bookings",
     label: "Booking Management",
     icon: Calendar,
-    badge: 12,
+    badgeType: "pending-bookings",
     href: "/dashboard/bookings",
   },
   {
@@ -85,7 +89,7 @@ const sidebarItems: SidebarItem[] = [
     id: "notifications",
     label: "Notification Center",
     icon: Bell,
-    badge: 5,
+    badgeType: "notifications",
     href: "/dashboard/notifications",
   },
   {
@@ -114,6 +118,38 @@ export function DashboardSidebar({
   className,
 }: DashboardSidebarProps) {
   const pathname = usePathname();
+  const [pendingBookings, setPendingBookings] = useState<number>(0);
+  const [notificationCount, setNotificationCount] = useState<number>(0);
+
+  useEffect(() => {
+    const fetchCounts = async () => {
+      try {
+        // Fetch pending bookings count
+        const bookingsRes = await BookingAPI.getBookings({
+          page: 1,
+          limit: 100,
+          status: "PENDING",
+        });
+        setPendingBookings(
+          bookingsRes.pagination?.total || bookingsRes.data.length
+        );
+      } catch (error) {
+        console.error("Failed to fetch counts:", error);
+      }
+    };
+
+    fetchCounts();
+    // Refresh counts every 30 seconds
+    const interval = setInterval(fetchCounts, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const getBadgeCount = (badgeType?: "pending-bookings" | "notifications") => {
+    if (badgeType === "pending-bookings") return pendingBookings;
+    if (badgeType === "notifications") return notificationCount;
+    return null;
+  };
+
   return (
     <aside
       className={cn(
@@ -161,6 +197,7 @@ export function DashboardSidebar({
             const isActive =
               pathname === item.href ||
               (item.href === "/dashboard" && pathname === "/dashboard");
+            const badgeCount = getBadgeCount(item.badgeType);
             return (
               <Link key={item.id} href={item.href}>
                 <Button
@@ -184,12 +221,12 @@ export function DashboardSidebar({
                       <span className="flex-1 text-left text-xs sm:text-sm font-medium">
                         {item.label}
                       </span>
-                      {item.badge && (
+                      {badgeCount !== null && badgeCount > 0 && (
                         <Badge
                           variant={isActive ? "secondary" : "default"}
                           className="ml-auto rounded-full px-1.5 sm:px-2.5 py-0 sm:py-0.5 text-xs"
                         >
-                          {item.badge}
+                          {badgeCount}
                         </Badge>
                       )}
                     </>
