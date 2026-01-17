@@ -53,7 +53,7 @@ import {
   Activity,
   MapPin,
 } from "lucide-react";
-import { BookingAPI } from "@/lib/services";
+import { BookingAPI, AnalyticsAPI } from "@/lib/services";
 import { ApiError } from "@/lib/utils/apiClient";
 import type { Booking, BookingStatus } from "@/lib/types/api";
 import { AuthErrorMessage } from "./AuthErrorMessage";
@@ -62,7 +62,7 @@ import { toast } from "sonner";
 export function BookingManagement() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<BookingStatus | "all">(
-    "all"
+    "all",
   );
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
@@ -72,6 +72,8 @@ export function BookingManagement() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isAuthError, setIsAuthError] = useState(false);
+  const [serviceRevenue, setServiceRevenue] = useState<number>(0);
+  const [totalBookingsCount, setTotalBookingsCount] = useState<number>(0);
 
   // Dialog States
   const [actionDialogOpen, setActionDialogOpen] = useState(false);
@@ -86,6 +88,27 @@ export function BookingManagement() {
   useEffect(() => {
     fetchBookings();
   }, [statusFilter, startDate, endDate]);
+
+  useEffect(() => {
+    const fetchAnalyticsData = async () => {
+      try {
+        // Fetch analytics for revenue
+        const analyticsResponse = await AnalyticsAPI.getAdminAnalytics({
+          period: "monthly",
+        });
+        setServiceRevenue(
+          parseFloat(analyticsResponse.data?.summary?.serviceRevenue || "0"),
+        );
+
+        // Fetch all bookings to get accurate total count
+        const allBookingsResponse = await BookingAPI.getBookings({});
+        setTotalBookingsCount(allBookingsResponse.data.length);
+      } catch (err) {
+        console.error("Failed to fetch analytics data:", err);
+      }
+    };
+    fetchAnalyticsData();
+  }, []);
 
   const fetchBookings = async () => {
     try {
@@ -125,7 +148,7 @@ export function BookingManagement() {
 
   const handleActionClick = (
     booking: Booking,
-    action: "confirm" | "complete" | "cancel"
+    action: "confirm" | "complete" | "cancel",
   ) => {
     setSelectedBooking(booking);
     setActionType(action);
@@ -191,11 +214,9 @@ export function BookingManagement() {
     completed: bookings.filter((b) => b.status === "COMPLETED").length,
     pending: bookings.filter((b) => b.status === "PENDING").length,
     cancelled: bookings.filter(
-      (b) => b.status === "CANCELLED" || b.status === "NO_SHOW"
+      (b) => b.status === "CANCELLED" || b.status === "NO_SHOW",
     ).length,
-    totalRevenue: bookings
-      .filter((b) => b.status === "COMPLETED")
-      .reduce((sum, b) => sum + parseFloat(b.service?.price || "0"), 0),
+    totalRevenue: serviceRevenue,
   };
 
   const getStatusColor = (status: BookingStatus) => {
@@ -261,7 +282,8 @@ export function BookingManagement() {
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold">Booking Management</h1>
           <p className="text-sm sm:text-base text-muted-foreground mt-1">
-            Manage and monitor all salon appointments ({stats.total} total)
+            Manage and monitor all salon appointments ({totalBookingsCount}{" "}
+            total)
           </p>
         </div>
       </div>
@@ -348,7 +370,11 @@ export function BookingManagement() {
                   Revenue
                 </p>
                 <p className="text-xl sm:text-2xl font-bold">
-                  ₹{stats.totalRevenue.toFixed(0)}
+                  {new Intl.NumberFormat("en-DE", {
+                    style: "currency",
+                    currency: "EUR",
+                    maximumFractionDigits: 0,
+                  }).format(stats.totalRevenue)}
                 </p>
               </div>
             </div>
@@ -481,7 +507,10 @@ export function BookingManagement() {
                     </TableCell>
                     <TableCell>
                       <span className="font-medium">
-                        ₹{parseFloat(booking.service?.price || "0").toFixed(2)}
+                        {new Intl.NumberFormat("en-DE", {
+                          style: "currency",
+                          currency: "EUR",
+                        }).format(parseFloat(booking.service?.price || "0"))}
                       </span>
                     </TableCell>
                     <TableCell>

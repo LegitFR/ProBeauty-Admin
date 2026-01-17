@@ -1,5 +1,5 @@
-import { AIAnalytics } from "@/components/ai-analytics";
+import { AdminAnalytics } from "@/components/admin-analytics";
 
-export default function AIAnalyticsPage() {
-  return <AIAnalytics />;
+export default function AdminAnalyticsPage() {
+  return <AdminAnalytics />;
 }

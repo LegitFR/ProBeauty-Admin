@@ -277,6 +277,8 @@ export interface SalonStaff {
   id: string;
   salonId: string;
   userId: string | null;
+  name: string;
+  image: string | null;
   availability: StaffAvailability;
   user?: SalonStaffUser;
 }
@@ -417,6 +419,8 @@ export interface Staff {
   id: string;
   salonId: string;
   userId: string | null;
+  name: string;
+  image: string | null;
   availability: StaffAvailability;
   services: StaffServiceRelation[];
   salon?: {

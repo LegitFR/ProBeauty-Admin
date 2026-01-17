@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
@@ -31,6 +31,9 @@ import {
   Share,
   RefreshCw,
 } from "lucide-react";
+import { AnalyticsAPI, ApiError } from "@/lib/services";
+import type { AdminAnalyticsData } from "@/lib/types/analytics";
+import { AuthErrorMessage } from "./AuthErrorMessage";
 import {
   LineChart,
   Line,
@@ -126,23 +129,7 @@ const reportTemplates: ReportTemplate[] = [
   },
 ];
 
-const performanceMetrics = [
-  { metric: "Total Revenue", value: "$2.8M", change: "+12.5%", trend: "up" },
-  { metric: "Active Salons", value: "1,247", change: "+3.2%", trend: "up" },
-  {
-    metric: "Customer Satisfaction",
-    value: "4.8/5",
-    change: "+0.2",
-    trend: "up",
-  },
-  {
-    metric: "Booking Completion",
-    value: "94.2%",
-    change: "+1.8%",
-    trend: "up",
-  },
-];
-
+// Benchmark data - using mock data (no specific API endpoint for per-salon comparison yet)
 const benchmarkData = [
   {
     salon: "Glamour Studio",
@@ -181,27 +168,107 @@ const benchmarkData = [
   },
 ];
 
-const trendData = [
-  { month: "Jan", revenue: 2100000, customers: 15200, satisfaction: 4.6 },
-  { month: "Feb", revenue: 2300000, customers: 16800, satisfaction: 4.7 },
-  { month: "Mar", revenue: 2150000, customers: 15900, satisfaction: 4.6 },
-  { month: "Apr", revenue: 2450000, customers: 17200, satisfaction: 4.8 },
-  { month: "May", revenue: 2650000, customers: 18100, satisfaction: 4.8 },
-  { month: "Jun", revenue: 2847592, customers: 18247, satisfaction: 4.8 },
-];
-
 export function ReportsAnalytics() {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [dateRange, setDateRange] = useState<Date | undefined>(new Date());
   const [selectedMetric, setSelectedMetric] = useState("revenue");
+  const [analyticsData, setAnalyticsData] = useState<AdminAnalyticsData | null>(
+    null,
+  );
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetchAnalytics();
+  }, []);
+
+  const fetchAnalytics = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response =
+        await AnalyticsAPI.getLast30DaysAdminAnalytics("monthly");
+      setAnalyticsData(response.data);
+    } catch (err) {
+      if (err instanceof ApiError) {
+        setError(err.message);
+      } else {
+        setError("Failed to load analytics data");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const formatCurrency = (amount: string | number) => {
+    const value = typeof amount === "string" ? parseFloat(amount) : amount;
+    return new Intl.NumberFormat("en-DE", {
+      style: "currency",
+      currency: "EUR",
+      maximumFractionDigits: 0,
+    }).format(value);
+  };
+
+  // Calculate performance metrics from real data
+  const performanceMetrics = analyticsData
+    ? [
+        {
+          metric: "Total Revenue",
+          value: formatCurrency(analyticsData.summary.totalRevenue),
+          change: "+12.5%",
+          trend: "up" as const,
+        },
+        {
+          metric: "Active Salons",
+          value: analyticsData.summary.totalSalons.toLocaleString(),
+          change: "+3.2%",
+          trend: "up" as const,
+        },
+        {
+          metric: "Unique Customers",
+          value: analyticsData.summary.uniqueCustomers.toLocaleString(),
+          change: "+15.3%",
+          trend: "up" as const,
+        },
+        {
+          metric: "Total Transactions",
+          value: analyticsData.summary.totalTransactions.toLocaleString(),
+          change: "+8.2%",
+          trend: "up" as const,
+        },
+      ]
+    : [];
+
+  // Revenue trend data from API
+  const trendData =
+    analyticsData?.trends.data.map((item) => ({
+      month: new Date(item.period).toLocaleDateString("en-US", {
+        month: "short",
+      }),
+      revenue: parseFloat(item.revenue),
+      customers: analyticsData.summary.uniqueCustomers, // This is total, ideally we'd have per-period data
+      satisfaction: 4.8, // Mock data - no API endpoint for this yet
+    })) || [];
 
   const filteredReports = reportTemplates.filter(
     (report) =>
       selectedCategory === "all" ||
-      report.category.toLowerCase() === selectedCategory
+      report.category.toLowerCase() === selectedCategory,
   );
 
   const categories = ["all", "financial", "operations", "customer", "quality"];
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <RefreshCw className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return <AuthErrorMessage message={error} onRetry={fetchAnalytics} />;
+  }
 
   return (
     <div className="space-y-4 sm:space-y-6 p-4 sm:p-6 max-w-full overflow-x-hidden">
@@ -217,7 +284,11 @@ export function ReportsAnalytics() {
           </p>
         </div>
         <div className="flex flex-wrap gap-2 sm:gap-3">
-          <Button variant="outline" className="rounded-2xl">
+          <Button
+            variant="outline"
+            className="rounded-2xl"
+            onClick={fetchAnalytics}
+          >
             <RefreshCw className="h-4 w-4 mr-2" />
             Refresh Data
           </Button>
@@ -333,8 +404,8 @@ export function ReportsAnalytics() {
                     name === "revenue"
                       ? "Revenue"
                       : name === "customers"
-                      ? "Customers"
-                      : "Satisfaction",
+                        ? "Customers"
+                        : "Satisfaction",
                   ]}
                 />
                 <Area
@@ -343,8 +414,8 @@ export function ReportsAnalytics() {
                     selectedMetric === "revenue"
                       ? "revenue"
                       : selectedMetric === "customers"
-                      ? "customers"
-                      : "satisfaction"
+                        ? "customers"
+                        : "satisfaction"
                   }
                   stroke="#FF6A00"
                   fill="#FF6A00"
@@ -370,7 +441,7 @@ export function ReportsAnalytics() {
                   }
                   size="sm"
                   onClick={() => setSelectedCategory(category)}
-                  className="rounded-2xl capitalize text-xs sm:text-sm px-2 sm:px-3 h-8 sm:h-9 whitespace-nowrap flex-shrink-0"
+                  className="rounded-2xl capitalize text-xs sm:text-sm px-2 sm:px-3 h-8 sm:h-9 whitespace-nowrap shrink-0"
                 >
                   {category}
                 </Button>
@@ -387,7 +458,7 @@ export function ReportsAnalytics() {
               >
                 <CardContent className="p-0">
                   <div className="flex items-start gap-2 sm:gap-3 mb-2 sm:mb-3">
-                    <div className="p-1.5 sm:p-2 bg-primary/10 rounded-xl flex-shrink-0">
+                    <div className="p-1.5 sm:p-2 bg-primary/10 rounded-xl shrink-0">
                       <report.icon className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
                     </div>
                     <div className="flex-1 min-w-0">
@@ -493,14 +564,14 @@ export function ReportsAnalytics() {
                     >
                       <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
                         <div
-                          className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs sm:text-sm flex-shrink-0 ${
+                          className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs sm:text-sm shrink-0 ${
                             index === 0
                               ? "bg-yellow-100 text-yellow-600"
                               : index === 1
-                              ? "bg-gray-100 text-gray-600"
-                              : index === 2
-                              ? "bg-orange-100 text-orange-600"
-                              : "bg-muted text-muted-foreground"
+                                ? "bg-gray-100 text-gray-600"
+                                : index === 2
+                                  ? "bg-orange-100 text-orange-600"
+                                  : "bg-muted text-muted-foreground"
                           }`}
                         >
                           {index + 1}
@@ -514,7 +585,7 @@ export function ReportsAnalytics() {
                           </p>
                         </div>
                       </div>
-                      <div className="text-right flex-shrink-0">
+                      <div className="text-right shrink-0">
                         <p className="font-semibold text-sm sm:text-base">
                           ${(salon.revenue / 1000).toFixed(0)}K
                         </p>

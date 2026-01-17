@@ -33,8 +33,15 @@ import {
   Pie,
   Cell,
 } from "recharts";
-import { SalonAPI, BookingAPI, UserAPI, ApiError } from "@/lib/services";
+import {
+  SalonAPI,
+  BookingAPI,
+  UserAPI,
+  AnalyticsAPI,
+  ApiError,
+} from "@/lib/services";
 import type { Salon, Booking } from "@/lib/types/api";
+import type { AdminAnalyticsData } from "@/lib/types/analytics";
 import { AuthErrorMessage } from "./AuthErrorMessage";
 
 interface Activity {
@@ -46,96 +53,13 @@ interface Activity {
   amount: string | null;
 }
 
-const kpiData = [
-  {
-    title: "Total Revenue",
-    value: "$2,847,592",
-    change: "+12.5%",
-    trend: "up",
-    icon: DollarSign,
-    period: "vs last month",
-  },
-  {
-    title: "Total Bookings",
-    value: "18,247",
-    change: "+8.2%",
-    trend: "up",
-    icon: Calendar,
-    period: "vs last month",
-  },
-  {
-    title: "Active Customers",
-    value: "94,832",
-    change: "+15.3%",
-    trend: "up",
-    icon: Users,
-    period: "vs last month",
-  },
-  {
-    title: "Partner Salons",
-    value: "1,247",
-    change: "+3.1%",
-    trend: "up",
-    icon: Building2,
-    period: "vs last month",
-  },
-];
-
-const revenueData = [
-  { month: "Jan", revenue: 2100000, bookings: 15200 },
-  { month: "Feb", revenue: 2300000, bookings: 16800 },
-  { month: "Mar", revenue: 2150000, bookings: 15900 },
-  { month: "Apr", revenue: 2450000, bookings: 17200 },
-  { month: "May", revenue: 2650000, bookings: 18100 },
-  { month: "Jun", revenue: 2847592, bookings: 18247 },
-];
-
-const topServices = [
-  { name: "Hair Cut & Style", value: 32, color: "#FF6A00" },
-  { name: "Hair Coloring", value: 28, color: "#E55A00" },
-  { name: "Manicure & Pedicure", value: 22, color: "#FFA366" },
-  { name: "Facial Treatment", value: 18, color: "#FFB380" },
-];
-
-const recentActivities: Activity[] = [
-  {
-    id: 1,
-    type: "booking" as const,
-    description: "New booking created at Glamour Studio",
-    time: "2 minutes ago",
-    status: "pending",
-    amount: "$125",
-  },
-  {
-    id: 2,
-    type: "payment" as const,
-    description: "Payment processed for Sarah Johnson",
-    time: "5 minutes ago",
-    status: "completed",
-    amount: "$89",
-  },
-  {
-    id: 3,
-    type: "salon" as const,
-    description: "Beauty Haven salon went live",
-    time: "15 minutes ago",
-    status: "active",
-    amount: null,
-  },
-  {
-    id: 4,
-    type: "review" as const,
-    description: "5-star review received from customer",
-    time: "30 minutes ago",
-    status: "positive",
-    amount: null,
-  },
-];
-
 export function OverviewDashboard() {
   const router = useRouter();
   const [salons, setSalons] = useState<Salon[]>([]);
   const [bookings, setBookings] = useState<Booking[]>([]);
+  const [analyticsData, setAnalyticsData] = useState<AdminAnalyticsData | null>(
+    null,
+  );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isAuthError, setIsAuthError] = useState(false);
@@ -150,13 +74,15 @@ export function OverviewDashboard() {
       setError(null);
       setIsAuthError(false);
 
-      const [salonsRes, bookingsRes] = await Promise.all([
+      const [salonsRes, bookingsRes, analyticsRes] = await Promise.all([
         SalonAPI.getSalons({ page: 1, limit: 100 }),
         BookingAPI.getBookings({ page: 1, limit: 100 }),
+        AnalyticsAPI.getAdminAnalytics({ period: "monthly" }), // All-time analytics
       ]);
 
       setSalons(salonsRes.data);
       setBookings(bookingsRes.data);
+      setAnalyticsData(analyticsRes.data);
     } catch (err) {
       if (err instanceof ApiError) {
         if (err.status === 401) {
@@ -171,42 +97,51 @@ export function OverviewDashboard() {
     }
   };
 
+  // Format currency
+  const formatCurrency = (amount: string | number) => {
+    const value = typeof amount === "string" ? parseFloat(amount) : amount;
+    return new Intl.NumberFormat("en-DE", {
+      style: "currency",
+      currency: "EUR",
+      maximumFractionDigits: 0,
+    }).format(value);
+  };
+
   // Calculate KPIs from real data
-  const totalBookings = bookings.length;
-  const totalSalons = salons.length;
-  const verifiedSalons = salons.filter((s) => s.verified).length;
-  const confirmedBookings = bookings.filter(
-    (b) => b.status === "CONFIRMED"
-  ).length;
+  const totalBookings =
+    analyticsData?.summary.totalTransactions || bookings.length;
+  const totalSalons = analyticsData?.summary.totalSalons || salons.length;
+  const totalRevenue = analyticsData?.summary.totalRevenue || "0";
+  const uniqueCustomers = analyticsData?.summary.uniqueCustomers || 0;
 
   const kpiData = [
     {
       title: "Total Revenue",
-      value: "$2,847,592",
+      value: formatCurrency(totalRevenue),
       change: "+12.5%",
       trend: "up" as const,
       icon: DollarSign,
       period: "vs last month",
     },
     {
-      title: "Total Bookings",
-      value: totalBookings.toString(),
+      title: "Total Transactions",
+      value: totalBookings.toLocaleString(),
       change: "+8.2%",
       trend: "up" as const,
       icon: Calendar,
       period: "vs last month",
     },
     {
-      title: "Active Salons",
-      value: verifiedSalons.toString(),
+      title: "Unique Customers",
+      value: uniqueCustomers.toLocaleString(),
       change: "+15.3%",
       trend: "up" as const,
       icon: Users,
       period: "vs last month",
     },
     {
-      title: "Partner Salons",
-      value: totalSalons.toString(),
+      title: "Active Salons",
+      value: totalSalons.toLocaleString(),
       change: "+3.1%",
       trend: "up" as const,
       icon: Building2,
@@ -214,15 +149,69 @@ export function OverviewDashboard() {
     },
   ];
 
-  // Recent activities from bookings
-  const recentActivities = bookings.slice(0, 4).map((booking) => ({
-    id: booking.id,
-    type: "booking" as const,
-    description: `New booking at ${booking.salon.name}`,
-    time: new Date(booking.startTime).toLocaleDateString(),
-    status: booking.status.toLowerCase(),
-    amount: `$${booking.service.price}`,
+  // Revenue data from analytics
+  const revenueData =
+    analyticsData?.trends.data.map((item) => ({
+      month: new Date(item.period).toLocaleDateString("en-US", {
+        month: "short",
+      }),
+      revenue: parseFloat(item.revenue),
+      bookings: item.transactions,
+    })) || [];
+
+  // Top services from analytics
+  const topServices =
+    analyticsData?.topServices.slice(0, 4).map((service, index) => ({
+      name: service.serviceName,
+      value: parseFloat(service.totalRevenue),
+      color: ["#FF6A00", "#E55A00", "#FFA366", "#FFB380"][index] || "#FF6A00",
+    })) || [];
+
+  // Calculate percentages for pie chart
+  const totalServiceRevenue = topServices.reduce((sum, s) => sum + s.value, 0);
+  const topServicesWithPercentage = topServices.map((service) => ({
+    ...service,
+    percentage:
+      totalServiceRevenue > 0
+        ? ((service.value / totalServiceRevenue) * 100).toFixed(1)
+        : 0,
   }));
+
+  // Recent activities from bookings
+  const recentActivities = bookings.slice(0, 4).map((booking, index) => {
+    const createdDate = new Date(booking.createdAt);
+    const now = new Date();
+
+    // Check if date is valid
+    let timeAgo = "Recently";
+    if (!isNaN(createdDate.getTime())) {
+      const diffMs = now.getTime() - createdDate.getTime();
+      const diffMins = Math.floor(diffMs / 60000);
+      const diffHours = Math.floor(diffMs / 3600000);
+      const diffDays = Math.floor(diffMs / 86400000);
+
+      if (diffMins < 1) {
+        timeAgo = "Just now";
+      } else if (diffMins < 60) {
+        timeAgo = `${diffMins} ${diffMins === 1 ? "minute" : "minutes"} ago`;
+      } else if (diffHours < 24) {
+        timeAgo = `${diffHours} ${diffHours === 1 ? "hour" : "hours"} ago`;
+      } else if (diffDays < 30) {
+        timeAgo = `${diffDays} ${diffDays === 1 ? "day" : "days"} ago`;
+      } else {
+        timeAgo = createdDate.toLocaleDateString();
+      }
+    }
+
+    return {
+      id: index,
+      type: "booking" as const,
+      description: `New booking at ${booking.salon.name}`,
+      time: timeAgo,
+      status: booking.status.toLowerCase(),
+      amount: formatCurrency(booking.service.price.toString()),
+    };
+  });
 
   if (loading) {
     return (
@@ -280,7 +269,7 @@ export function OverviewDashboard() {
             <CardContent className="p-0">
               <div className="flex items-start justify-between gap-2">
                 <div className="flex items-start gap-2 sm:gap-3 min-w-0 flex-1">
-                  <div className="p-2 bg-primary/10 rounded-xl flex-shrink-0">
+                  <div className="p-2 bg-primary/10 rounded-xl shrink-0">
                     <kpi.icon className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
                   </div>
                   <div className="min-w-0">
@@ -290,7 +279,7 @@ export function OverviewDashboard() {
                     <p className="text-xl sm:text-2xl font-bold">{kpi.value}</p>
                   </div>
                 </div>
-                <div className="text-right flex-shrink-0">
+                <div className="text-right shrink-0">
                   <div
                     className={`flex items-center gap-0.5 sm:gap-1 ${
                       kpi.trend === "up" ? "text-green-600" : "text-red-600"
@@ -334,8 +323,8 @@ export function OverviewDashboard() {
                 <XAxis dataKey="month" />
                 <YAxis />
                 <Tooltip
-                  formatter={(value) => [
-                    `$${((value as number) / 1000000).toFixed(1)}M`,
+                  formatter={(value: number) => [
+                    formatCurrency(value),
                     "Revenue",
                   ]}
                 />
@@ -350,7 +339,6 @@ export function OverviewDashboard() {
             </ResponsiveContainer>
           </CardContent>
         </Card>
-
         {/* Top Services */}
         <Card className="p-4 sm:p-6">
           <CardHeader className="p-0 pb-3 sm:pb-4">
@@ -360,36 +348,41 @@ export function OverviewDashboard() {
             <ResponsiveContainer width="100%" height={250} minWidth={300}>
               <PieChart>
                 <Pie
-                  data={topServices}
+                  data={topServicesWithPercentage}
                   cx="50%"
                   cy="50%"
                   outerRadius={80}
                   dataKey="value"
                 >
-                  {topServices.map((entry, index) => (
+                  {topServicesWithPercentage.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
                 </Pie>
-                <Tooltip formatter={(value) => [`${value}%`, "Percentage"]} />
+                <Tooltip
+                  formatter={(value: number) => [
+                    formatCurrency(value),
+                    "Revenue",
+                  ]}
+                />
               </PieChart>
             </ResponsiveContainer>
             <div className="mt-3 sm:mt-4 space-y-1.5 sm:space-y-2">
-              {topServices.map((service, index) => (
+              {topServicesWithPercentage.map((service, index) => (
                 <div
                   key={index}
                   className="flex items-center justify-between gap-2"
                 >
                   <div className="flex items-center gap-2 min-w-0 flex-1">
                     <div
-                      className="w-3 h-3 rounded-full flex-shrink-0"
+                      className="w-3 h-3 rounded-full shrink-0"
                       style={{ backgroundColor: service.color }}
                     />
                     <span className="text-xs sm:text-sm truncate">
                       {service.name}
                     </span>
                   </div>
-                  <span className="text-xs sm:text-sm font-medium flex-shrink-0">
-                    {service.value}%
+                  <span className="text-xs sm:text-sm font-medium shrink-0">
+                    {service.percentage}%
                   </span>
                 </div>
               ))}
@@ -435,7 +428,7 @@ export function OverviewDashboard() {
                 >
                   <div className="flex items-start gap-2 sm:gap-3 min-w-0 flex-1">
                     <div
-                      className={`p-1.5 sm:p-2 rounded-lg sm:rounded-xl flex-shrink-0 ${iconBgClass}`}
+                      className={`p-1.5 sm:p-2 rounded-lg sm:rounded-xl shrink-0 ${iconBgClass}`}
                     >
                       {type === "booking" && <Calendar className={iconClass} />}
                       {type === "payment" && (
@@ -449,14 +442,14 @@ export function OverviewDashboard() {
                         {activity.description}
                       </p>
                       <div className="flex items-center gap-1.5 sm:gap-2 mt-1">
-                        <Clock className="h-3 w-3 text-muted-foreground flex-shrink-0" />
+                        <Clock className="h-3 w-3 text-muted-foreground shrink-0" />
                         <span className="text-xs text-muted-foreground">
                           {activity.time}
                         </span>
                       </div>
                     </div>
                   </div>
-                  <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-start gap-2 sm:text-right flex-shrink-0">
+                  <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-start gap-2 sm:text-right shrink-0">
                     {activity.amount && (
                       <p className="text-sm sm:text-base font-medium text-green-600">
                         {activity.amount}

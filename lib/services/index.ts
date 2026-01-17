@@ -6,11 +6,17 @@
 // Address API
 export * as AddressAPI from "./addressService";
 
+// Analytics API
+export * as AnalyticsAPI from "./analyticsService";
+
 // Booking API
 export * as BookingAPI from "./bookingService";
 
 // Order API
 export * as OrderAPI from "./orderService";
+
+// Offer API
+export * as OfferAPI from "./offerService";
 
 // Product API
 export * as ProductAPI from "./productService";

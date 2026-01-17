@@ -1,7 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
+import { AnalyticsAPI, ApiError } from "@/lib/services";
+import type { AdminAnalyticsData } from "@/lib/types/analytics";
+import { AuthErrorMessage } from "./AuthErrorMessage";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
 import { Avatar, AvatarFallback } from "./ui/avatar";
@@ -34,6 +37,8 @@ import {
   Smartphone,
   Banknote,
   Shield,
+  ShoppingCart,
+  RefreshCw,
 } from "lucide-react";
 import {
   LineChart,
@@ -50,92 +55,7 @@ import {
   Cell,
 } from "recharts";
 
-interface Transaction {
-  id: string;
-  customer: string;
-  salon: string;
-  amount: number;
-  fee: number;
-  method: "card" | "paypal" | "apple_pay" | "google_pay";
-  status: "completed" | "pending" | "failed";
-  date: string;
-  time: string;
-  service: string;
-}
-
-const transactionsData: Transaction[] = [
-  {
-    id: "TXN001",
-    customer: "Sarah Johnson",
-    salon: "Glamour Studio",
-    amount: 125.0,
-    fee: 3.75,
-    method: "card",
-    status: "completed",
-    date: "2024-01-15",
-    time: "14:30",
-    service: "Hair Cut & Color",
-  },
-  {
-    id: "TXN002",
-    customer: "Emily Davis",
-    salon: "Beauty Haven",
-    amount: 89.5,
-    fee: 2.69,
-    method: "apple_pay",
-    status: "completed",
-    date: "2024-01-15",
-    time: "13:45",
-    service: "Facial Treatment",
-  },
-  {
-    id: "TXN003",
-    customer: "Michael Brown",
-    salon: "Style & Grace",
-    amount: 65.0,
-    fee: 1.95,
-    method: "google_pay",
-    status: "pending",
-    date: "2024-01-15",
-    time: "12:20",
-    service: "Haircut",
-  },
-  {
-    id: "TXN004",
-    customer: "Jessica Wilson",
-    salon: "Elegant Touch",
-    amount: 150.0,
-    fee: 4.5,
-    method: "card",
-    status: "failed",
-    date: "2024-01-15",
-    time: "11:15",
-    service: "Manicure & Pedicure",
-  },
-  {
-    id: "TXN005",
-    customer: "David Martinez",
-    salon: "Urban Chic",
-    amount: 95.75,
-    fee: 2.87,
-    method: "paypal",
-    status: "completed",
-    date: "2024-01-15",
-    time: "10:30",
-    service: "Beard Trim",
-  },
-];
-
-const revenueData = [
-  { day: "Mon", revenue: 12500, transactions: 45 },
-  { day: "Tue", revenue: 15200, transactions: 52 },
-  { day: "Wed", revenue: 14800, transactions: 48 },
-  { day: "Thu", revenue: 16900, transactions: 61 },
-  { day: "Fri", revenue: 18400, transactions: 67 },
-  { day: "Sat", revenue: 22100, transactions: 78 },
-  { day: "Sun", revenue: 19200, transactions: 69 },
-];
-
+// Payment methods sample data (kept for UI demonstration only)
 const paymentMethods = [
   { name: "Credit Card", value: 45, color: "#FF6A00", count: 234 },
   { name: "Apple Pay", value: 25, color: "#E55A00", count: 128 },
@@ -144,57 +64,129 @@ const paymentMethods = [
 ];
 
 export function PaymentsFinance() {
-  const [selectedPeriod, setSelectedPeriod] = useState("7d");
-  const [statusFilter, setStatusFilter] = useState("all");
+  const [selectedPeriod, setSelectedPeriod] = useState("all");
+  const [analyticsData, setAnalyticsData] = useState<AdminAnalyticsData | null>(
+    null,
+  );
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const totalRevenue = transactionsData
-    .filter((t) => t.status === "completed")
-    .reduce((sum, t) => sum + t.amount, 0);
+  useEffect(() => {
+    fetchAnalytics();
+  }, [selectedPeriod]);
 
-  const totalFees = transactionsData
-    .filter((t) => t.status === "completed")
-    .reduce((sum, t) => sum + t.fee, 0);
+  const fetchAnalytics = async () => {
+    try {
+      setLoading(true);
+      setError(null);
 
-  const pendingAmount = transactionsData
-    .filter((t) => t.status === "pending")
-    .reduce((sum, t) => sum + t.amount, 0);
+      let response;
+      if (selectedPeriod === "7d") {
+        const endDate = new Date();
+        const startDate = new Date();
+        startDate.setDate(startDate.getDate() - 7);
+        response = await AnalyticsAPI.getAdminAnalytics({
+          startDate: startDate.toISOString(),
+          endDate: endDate.toISOString(),
+          period: "daily",
+        });
+      } else if (selectedPeriod === "30d") {
+        const endDate = new Date();
+        const startDate = new Date();
+        startDate.setDate(startDate.getDate() - 30);
+        response = await AnalyticsAPI.getAdminAnalytics({
+          startDate: startDate.toISOString(),
+          endDate: endDate.toISOString(),
+          period: "daily",
+        });
+      } else if (selectedPeriod === "90d") {
+        const endDate = new Date();
+        const startDate = new Date();
+        startDate.setDate(startDate.getDate() - 90);
+        response = await AnalyticsAPI.getAdminAnalytics({
+          startDate: startDate.toISOString(),
+          endDate: endDate.toISOString(),
+          period: "weekly",
+        });
+      } else {
+        // All time
+        response = await AnalyticsAPI.getAdminAnalytics({ period: "monthly" });
+      }
 
-  const failedCount = transactionsData.filter(
-    (t) => t.status === "failed"
-  ).length;
-
-  const filteredTransactions = transactionsData.filter((transaction) => {
-    if (statusFilter === "all") return true;
-    return transaction.status === statusFilter;
-  });
-
-  const getMethodIcon = (method: string) => {
-    switch (method) {
-      case "card":
-        return <CreditCard className="h-4 w-4" />;
-      case "apple_pay":
-        return <Smartphone className="h-4 w-4" />;
-      case "google_pay":
-        return <Smartphone className="h-4 w-4" />;
-      case "paypal":
-        return <Banknote className="h-4 w-4" />;
-      default:
-        return <CreditCard className="h-4 w-4" />;
+      setAnalyticsData(response.data);
+    } catch (err) {
+      if (err instanceof ApiError) {
+        setError(err.message);
+      } else {
+        setError("Failed to load analytics data");
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "completed":
-        return "text-green-600 bg-green-100";
-      case "pending":
-        return "text-yellow-600 bg-yellow-100";
-      case "failed":
-        return "text-red-600 bg-red-100";
-      default:
-        return "text-gray-600 bg-gray-100";
-    }
+  const formatCurrency = (amount: string | number) => {
+    const value = typeof amount === "string" ? parseFloat(amount) : amount;
+    return new Intl.NumberFormat("en-DE", {
+      style: "currency",
+      currency: "EUR",
+      maximumFractionDigits: 2,
+    }).format(value);
   };
+
+  // Calculate metrics from real analytics data
+  const totalRevenue = analyticsData
+    ? parseFloat(analyticsData.summary.totalRevenue)
+    : 0;
+  const totalFees = analyticsData
+    ? parseFloat(analyticsData.summary.adminProfit)
+    : 0; // 2% platform commission
+  const totalTransactions = analyticsData?.summary.totalTransactions || 0;
+  const productRevenue = analyticsData
+    ? parseFloat(analyticsData.summary.productRevenue)
+    : 0;
+  const serviceRevenue = analyticsData
+    ? parseFloat(analyticsData.summary.serviceRevenue)
+    : 0;
+
+  // Pending and failed transaction data not available from API yet
+  const pendingAmount = 0;
+  const failedCount = 0;
+
+  // Convert analytics trends to chart data
+  const revenueChartData =
+    analyticsData?.trends.data.map((item) => ({
+      day: new Date(item.period).toLocaleDateString("en-US", {
+        weekday:
+          selectedPeriod === "90d" || selectedPeriod === "all"
+            ? undefined
+            : "short",
+        month:
+          selectedPeriod === "90d" || selectedPeriod === "all"
+            ? "short"
+            : undefined,
+        day: "numeric",
+      }),
+      revenue: parseFloat(item.revenue),
+      transactions: item.transactions,
+    })) || [];
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4 text-muted-foreground">
+            Loading financial data...
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return <AuthErrorMessage message={error} onRetry={fetchAnalytics} />;
+  }
 
   return (
     <div className="space-y-4 sm:space-y-6 p-4 sm:p-6 max-w-full overflow-x-hidden">
@@ -207,6 +199,14 @@ export function PaymentsFinance() {
           </p>
         </div>
         <div className="flex flex-wrap gap-2 sm:gap-3">
+          <Button
+            variant="outline"
+            className="rounded-2xl"
+            onClick={fetchAnalytics}
+          >
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Refresh Data
+          </Button>
           <Button variant="outline" className="rounded-2xl">
             <Download className="h-4 w-4 mr-2" />
             Export Data
@@ -231,7 +231,7 @@ export function PaymentsFinance() {
                     Total Revenue
                   </p>
                   <p className="text-xl sm:text-2xl font-bold">
-                    ${totalRevenue.toFixed(2)}
+                    {formatCurrency(totalRevenue)}
                   </p>
                 </div>
               </div>
@@ -252,15 +252,15 @@ export function PaymentsFinance() {
                 </div>
                 <div>
                   <p className="text-xs sm:text-sm text-muted-foreground">
-                    Processing Fees
+                    Platform Commission
                   </p>
                   <p className="text-xl sm:text-2xl font-bold">
-                    ${totalFees.toFixed(2)}
+                    {formatCurrency(totalFees)}
                   </p>
                 </div>
               </div>
               <div className="text-blue-600 flex items-center gap-1">
-                <span className="text-sm">2.5% avg</span>
+                <span className="text-sm">2% of revenue</span>
               </div>
             </div>
           </CardContent>
@@ -277,14 +277,14 @@ export function PaymentsFinance() {
                   <p className="text-xs sm:text-sm text-muted-foreground">
                     Pending Amount
                   </p>
-                  <p className="text-xl sm:text-2xl font-bold">
-                    ${pendingAmount.toFixed(2)}
+                  <p className="text-lg sm:text-xl font-medium text-muted-foreground">
+                    Coming Soon
                   </p>
                 </div>
               </div>
-              <div className="text-yellow-600 flex items-center gap-1">
-                <span className="text-sm">1 pending</span>
-              </div>
+              <Badge variant="secondary" className="text-xs">
+                No API
+              </Badge>
             </div>
           </CardContent>
         </Card>
@@ -300,13 +300,82 @@ export function PaymentsFinance() {
                   <p className="text-sm text-muted-foreground">
                     Failed Transactions
                   </p>
-                  <p className="text-2xl font-bold">{failedCount}</p>
+                  <p className="text-lg sm:text-xl font-medium text-muted-foreground">
+                    Coming Soon
+                  </p>
                 </div>
               </div>
-              <div className="text-red-600 flex items-center gap-1">
-                <ArrowDownRight className="h-4 w-4" />
-                <span className="text-sm">-2.1%</span>
+              <Badge variant="secondary" className="text-xs">
+                No API
+              </Badge>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Revenue Breakdown - Products vs Services */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Card className="p-4 sm:p-6">
+          <CardContent className="p-0">
+            <div className="flex items-start justify-between mb-4">
+              <div>
+                <p className="text-sm text-muted-foreground">Product Revenue</p>
+                <p className="text-2xl font-bold mt-1">
+                  {formatCurrency(productRevenue)}
+                </p>
               </div>
+              <div className="p-2 bg-orange-100 rounded-lg">
+                <ShoppingCart className="h-5 w-5 text-orange-600" />
+              </div>
+            </div>
+            <div className="text-sm text-muted-foreground">
+              {totalRevenue > 0
+                ? ((productRevenue / totalRevenue) * 100).toFixed(1)
+                : 0}
+              % of total revenue
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="p-4 sm:p-6">
+          <CardContent className="p-0">
+            <div className="flex items-start justify-between mb-4">
+              <div>
+                <p className="text-sm text-muted-foreground">Service Revenue</p>
+                <p className="text-2xl font-bold mt-1">
+                  {formatCurrency(serviceRevenue)}
+                </p>
+              </div>
+              <div className="p-2 bg-purple-100 rounded-lg">
+                <CheckCircle className="h-5 w-5 text-purple-600" />
+              </div>
+            </div>
+            <div className="text-sm text-muted-foreground">
+              {totalRevenue > 0
+                ? ((serviceRevenue / totalRevenue) * 100).toFixed(1)
+                : 0}
+              % of total revenue
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="p-4 sm:p-6">
+          <CardContent className="p-0">
+            <div className="flex items-start justify-between mb-4">
+              <div>
+                <p className="text-sm text-muted-foreground">
+                  Total Transactions
+                </p>
+                <p className="text-2xl font-bold mt-1">
+                  {totalTransactions.toLocaleString()}
+                </p>
+              </div>
+              <div className="p-2 bg-blue-100 rounded-lg">
+                <TrendingUp className="h-5 w-5 text-blue-600" />
+              </div>
+            </div>
+            <div className="text-sm text-muted-foreground">
+              Across all salons
             </div>
           </CardContent>
         </Card>
@@ -320,10 +389,11 @@ export function PaymentsFinance() {
             <CardTitle className="flex items-center justify-between">
               <span>Daily Revenue Trend</span>
               <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
-                <SelectTrigger className="w-24">
+                <SelectTrigger className="w-32">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="all">All Time</SelectItem>
                   <SelectItem value="7d">7 days</SelectItem>
                   <SelectItem value="30d">30 days</SelectItem>
                   <SelectItem value="90d">90 days</SelectItem>
@@ -333,13 +403,15 @@ export function PaymentsFinance() {
           </CardHeader>
           <CardContent className="p-0">
             <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={revenueData}>
+              <BarChart data={revenueChartData}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="day" />
                 <YAxis />
                 <Tooltip
                   formatter={(value, name) => [
-                    name === "revenue" ? `$${value}` : value,
+                    name === "revenue"
+                      ? formatCurrency(value as number)
+                      : value,
                     name === "revenue" ? "Revenue" : "Transactions",
                   ]}
                 />
@@ -352,7 +424,12 @@ export function PaymentsFinance() {
         {/* Payment Methods Distribution */}
         <Card className="p-6">
           <CardHeader className="p-0 pb-4">
-            <CardTitle>Payment Methods</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              Payment Methods
+              <Badge variant="secondary" className="text-xs">
+                Sample Data
+              </Badge>
+            </CardTitle>
           </CardHeader>
           <CardContent className="p-0">
             <ResponsiveContainer width="100%" height={200}>
@@ -394,132 +471,37 @@ export function PaymentsFinance() {
         </Card>
       </div>
 
-      {/* Transaction Filters */}
-      <Card className="p-4">
-        <div className="flex flex-col md:flex-row gap-4 items-center">
-          <div className="flex gap-3 flex-1">
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-40">
-                <SelectValue placeholder="Status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="completed">Completed</SelectItem>
-                <SelectItem value="pending">Pending</SelectItem>
-                <SelectItem value="failed">Failed</SelectItem>
-              </SelectContent>
-            </Select>
-            <Button variant="outline" className="rounded-2xl">
-              <Filter className="h-4 w-4 mr-2" />
-              More Filters
-            </Button>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-muted-foreground">
-              Real-time updates
-            </span>
-            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-          </div>
-        </div>
-      </Card>
-
       {/* Transactions Table */}
       <Card>
         <CardHeader>
-          <CardTitle>Recent Transactions</CardTitle>
+          <CardTitle className="flex items-center justify-between">
+            <span>Recent Transactions</span>
+            <Badge variant="secondary" className="text-xs">
+              Coming Soon
+            </Badge>
+          </CardTitle>
         </CardHeader>
-        <CardContent className="p-0">
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Transaction ID</TableHead>
-                  <TableHead>Customer</TableHead>
-                  <TableHead>Salon</TableHead>
-                  <TableHead>Service</TableHead>
-                  <TableHead>Amount</TableHead>
-                  <TableHead>Fee</TableHead>
-                  <TableHead>Method</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Date & Time</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredTransactions.map((transaction) => (
-                  <TableRow key={transaction.id}>
-                    <TableCell className="font-mono text-sm">
-                      {transaction.id}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <Avatar className="h-8 w-8">
-                          <AvatarFallback>
-                            {transaction.customer
-                              .split(" ")
-                              .map((n) => n[0])
-                              .join("")}
-                          </AvatarFallback>
-                        </Avatar>
-                        <span className="font-medium">
-                          {transaction.customer}
-                        </span>
-                      </div>
-                    </TableCell>
-                    <TableCell className="font-medium">
-                      {transaction.salon}
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">
-                      {transaction.service}
-                    </TableCell>
-                    <TableCell>
-                      <span className="font-semibold">
-                        ${transaction.amount.toFixed(2)}
-                      </span>
-                    </TableCell>
-                    <TableCell>
-                      <span className="text-muted-foreground">
-                        ${transaction.fee.toFixed(2)}
-                      </span>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        {getMethodIcon(transaction.method)}
-                        <span className="capitalize">
-                          {transaction.method.replace("_", " ")}
-                        </span>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        className={`rounded-full ${getStatusColor(
-                          transaction.status
-                        )}`}
-                        variant="secondary"
-                      >
-                        {transaction.status === "completed" && (
-                          <CheckCircle className="h-3 w-3 mr-1" />
-                        )}
-                        {transaction.status === "pending" && (
-                          <Clock className="h-3 w-3 mr-1" />
-                        )}
-                        {transaction.status === "failed" && (
-                          <AlertTriangle className="h-3 w-3 mr-1" />
-                        )}
-                        {transaction.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div className="text-sm">
-                        <div>{transaction.date}</div>
-                        <div className="text-muted-foreground">
-                          {transaction.time}
-                        </div>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+        <CardContent>
+          <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
+            <div className="p-4 bg-muted/50 rounded-full mb-4">
+              <CreditCard className="h-12 w-12 text-muted-foreground" />
+            </div>
+            <h3 className="text-lg font-semibold mb-2">
+              Transaction Details Coming Soon
+            </h3>
+            <p className="text-sm text-muted-foreground max-w-md mb-6">
+              Individual transaction tracking with payment methods, customer
+              details, and real-time status updates will be available once the
+              transaction API endpoint is integrated.
+            </p>
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" disabled>
+                View All Transactions
+              </Button>
+              <Button variant="outline" size="sm" disabled>
+                Export Data
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Card>

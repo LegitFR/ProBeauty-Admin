@@ -62,13 +62,14 @@ import {
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
-import { ProductAPI, SalonAPI, OrderAPI } from "@/lib/services";
+import { ProductAPI, SalonAPI, OrderAPI, OfferAPI } from "@/lib/services";
 import { ApiError } from "@/lib/utils/apiClient";
 import type {
   Product as APIProduct,
   OrderDetail,
   OrderStatus,
 } from "@/lib/types/api";
+import type { Offer } from "@/lib/types/offer";
 import { AuthErrorMessage } from "./AuthErrorMessage";
 
 interface Product {
@@ -114,7 +115,7 @@ export function ECommerceManagement() {
   const [editingProduct, setEditingProduct] = useState<APIProduct | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [deletingProductId, setDeletingProductId] = useState<string | null>(
-    null
+    null,
   );
   const [selectedOrder, setSelectedOrder] = useState<OrderDetail | null>(null);
   const [isOrderDetailOpen, setIsOrderDetailOpen] = useState(false);
@@ -133,6 +134,7 @@ export function ECommerceManagement() {
   // API State
   const [products, setProducts] = useState<APIProduct[]>([]);
   const [orders, setOrders] = useState<OrderDetail[]>([]);
+  const [offers, setOffers] = useState<Offer[]>([]);
   const [salonNames, setSalonNames] = useState<Map<string, string>>(new Map());
   const [loading, setLoading] = useState(true);
   const [ordersLoading, setOrdersLoading] = useState(false);
@@ -142,6 +144,7 @@ export function ECommerceManagement() {
 
   useEffect(() => {
     fetchProducts();
+    fetchOffers();
   }, []);
 
   useEffect(() => {
@@ -173,7 +176,7 @@ export function ECommerceManagement() {
             console.error(`Failed to fetch salon ${salonId}:`, err);
             salonNamesMap.set(salonId, `Salon ID: ${salonId}`);
           }
-        })
+        }),
       );
 
       setSalonNames(salonNamesMap);
@@ -188,6 +191,25 @@ export function ECommerceManagement() {
       }
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchOffers = async () => {
+    try {
+      setError(null);
+      setIsAuthError(false);
+      const response = await OfferAPI.getActiveOffers();
+      console.log("Fetched offers:", response);
+      setOffers(response.data);
+    } catch (err) {
+      if (err instanceof ApiError) {
+        if (err.status === 401) {
+          setIsAuthError(true);
+        }
+        console.error("Failed to fetch offers:", err.message);
+      } else {
+        console.error("Failed to fetch offers");
+      }
     }
   };
 
@@ -351,7 +373,7 @@ export function ECommerceManagement() {
 
   const handleUpdateOrderStatus = async (
     orderId: string,
-    newStatus: OrderStatus
+    newStatus: OrderStatus,
   ) => {
     try {
       await OrderAPI.updateOrderStatus(orderId, { status: newStatus });
@@ -373,7 +395,7 @@ export function ECommerceManagement() {
   const handleCancelOrder = async (orderId: string) => {
     if (
       !confirm(
-        "Are you sure you want to cancel this order? Product quantities will be restored."
+        "Are you sure you want to cancel this order? Product quantities will be restored.",
       )
     )
       return;
@@ -507,14 +529,14 @@ export function ECommerceManagement() {
 
   const totalProducts = transformedProducts.length;
   const lowStockProducts = transformedProducts.filter(
-    (p) => p.stock <= p.lowStockThreshold && p.stock > 0
+    (p) => p.stock <= p.lowStockThreshold && p.stock > 0,
   ).length;
   const outOfStockProducts = transformedProducts.filter(
-    (p) => p.stock === 0
+    (p) => p.stock === 0,
   ).length;
   const totalRevenue = transformedProducts.reduce(
     (sum, p) => sum + p.revenue,
-    0
+    0,
   );
 
   return (
@@ -871,7 +893,7 @@ export function ECommerceManagement() {
         onValueChange={setActiveTab}
         className="space-y-6"
       >
-        <TabsList className="grid w-full grid-cols-4 rounded-2xl p-1">
+        <TabsList className="grid w-full grid-cols-5 rounded-2xl p-1">
           <TabsTrigger
             value="products"
             className="rounded-xl text-xs sm:text-sm px-2 sm:px-3"
@@ -899,6 +921,13 @@ export function ECommerceManagement() {
           >
             <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
             <span className="hidden xs:inline ml-1 sm:ml-0">Analytics</span>
+          </TabsTrigger>
+          <TabsTrigger
+            value="offers"
+            className="rounded-xl text-xs sm:text-sm px-2 sm:px-3"
+          >
+            <Tag className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
+            <span className="hidden xs:inline ml-1 sm:ml-0">Offers</span>
           </TabsTrigger>
         </TabsList>
 
@@ -978,8 +1007,8 @@ export function ECommerceManagement() {
                       {stockStatus.status === "out-of-stock"
                         ? "Out of Stock"
                         : stockStatus.status === "low-stock"
-                        ? "Low Stock"
-                        : "In Stock"}
+                          ? "Low Stock"
+                          : "In Stock"}
                     </Badge>
                   </div>
 
@@ -1046,7 +1075,7 @@ export function ECommerceManagement() {
                           className="flex-1"
                           onClick={() => {
                             const apiProduct = products.find(
-                              (p) => p.id === product.id
+                              (p) => p.id === product.id,
                             );
                             if (apiProduct) openEditDialog(apiProduct);
                           }}
@@ -1475,7 +1504,7 @@ export function ECommerceManagement() {
                                       month: "short",
                                       day: "numeric",
                                       year: "numeric",
-                                    }
+                                    },
                                   )}
                                 </p>
                               </div>
@@ -1485,7 +1514,7 @@ export function ECommerceManagement() {
                                   {
                                     hour: "2-digit",
                                     minute: "2-digit",
-                                  }
+                                  },
                                 )}
                               </p>
                             </div>
@@ -1564,7 +1593,7 @@ export function ECommerceManagement() {
                                 (sum, item) =>
                                   sum +
                                   parseFloat(item.unitPrice) * item.quantity,
-                                0
+                                0,
                               );
                               const orderTotal = parseFloat(order.total);
                               const hasDiscrepancy =
@@ -1616,7 +1645,7 @@ export function ECommerceManagement() {
                                           onClick={() =>
                                             handleUpdateOrderStatus(
                                               order.id,
-                                              "CONFIRMED"
+                                              "CONFIRMED",
                                             )
                                           }
                                         >
@@ -1629,7 +1658,7 @@ export function ECommerceManagement() {
                                           onClick={() =>
                                             handleUpdateOrderStatus(
                                               order.id,
-                                              "PAYMENT_PENDING"
+                                              "PAYMENT_PENDING",
                                             )
                                           }
                                         >
@@ -1646,7 +1675,7 @@ export function ECommerceManagement() {
                                           onClick={() =>
                                             handleUpdateOrderStatus(
                                               order.id,
-                                              "CONFIRMED"
+                                              "CONFIRMED",
                                             )
                                           }
                                         >
@@ -1659,7 +1688,7 @@ export function ECommerceManagement() {
                                           onClick={() =>
                                             handleUpdateOrderStatus(
                                               order.id,
-                                              "PAYMENT_FAILED"
+                                              "PAYMENT_FAILED",
                                             )
                                           }
                                         >
@@ -1675,7 +1704,7 @@ export function ECommerceManagement() {
                                         onClick={() =>
                                           handleUpdateOrderStatus(
                                             order.id,
-                                            "SHIPPED"
+                                            "SHIPPED",
                                           )
                                         }
                                       >
@@ -1690,7 +1719,7 @@ export function ECommerceManagement() {
                                         onClick={() =>
                                           handleUpdateOrderStatus(
                                             order.id,
-                                            "DELIVERED"
+                                            "DELIVERED",
                                           )
                                         }
                                       >
@@ -1748,7 +1777,7 @@ export function ECommerceManagement() {
                       <Badge
                         variant="outline"
                         className={`${getOrderStatusColor(
-                          selectedOrder.status.toLowerCase()
+                          selectedOrder.status.toLowerCase(),
                         )} rounded-full mt-1`}
                       >
                         {selectedOrder.status}
@@ -1767,7 +1796,7 @@ export function ECommerceManagement() {
                             day: "numeric",
                             hour: "2-digit",
                             minute: "2-digit",
-                          }
+                          },
                         )}
                       </p>
                     </div>
@@ -1868,7 +1897,7 @@ export function ECommerceManagement() {
                           selectedOrder.orderItems.reduce(
                             (sum, item) =>
                               sum + parseFloat(item.unitPrice) * item.quantity,
-                            0
+                            0,
                           );
                         const orderTotal = parseFloat(selectedOrder.total);
                         const hasDiscrepancy =
@@ -1937,7 +1966,7 @@ export function ECommerceManagement() {
                 <div className="space-y-3">
                   {transformedProducts
                     .filter(
-                      (p) => p.stock <= p.lowStockThreshold && p.stock > 0
+                      (p) => p.stock <= p.lowStockThreshold && p.stock > 0,
                     )
                     .map((product) => (
                       <div
@@ -2023,6 +2052,113 @@ export function ECommerceManagement() {
               </CardContent>
             </Card>
           </div>
+        </TabsContent>
+
+        <TabsContent value="offers" className="space-y-6">
+          <div className="flex justify-between items-center mb-4">
+            <div>
+              <h2 className="text-xl font-semibold">Product Offers</h2>
+              <p className="text-sm text-muted-foreground">
+                Active promotional offers for products
+              </p>
+            </div>
+          </div>
+
+          {offers.length === 0 ? (
+            <Card>
+              <CardContent className="p-12 text-center">
+                <Tag className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-lg font-semibold mb-2">
+                  No Offers Available
+                </h3>
+                <p className="text-muted-foreground">
+                  There are currently no promotional offers
+                </p>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {offers
+                .filter(
+                  (offer) => offer.offerType === "product" && offer.product,
+                )
+                .map((offer) => (
+                  <Card key={offer.id} className="overflow-hidden">
+                    {offer.image && (
+                      <div className="relative h-40">
+                        <ImageWithFallback
+                          src={offer.image}
+                          alt={offer.title}
+                          className="w-full h-full object-cover"
+                        />
+                        <Badge
+                          className={`absolute top-2 right-2 ${
+                            offer.isActive ? "bg-green-500" : "bg-gray-500"
+                          }`}
+                        >
+                          {offer.isActive ? "Active" : "Inactive"}
+                        </Badge>
+                      </div>
+                    )}
+                    <CardContent className="p-4 space-y-3">
+                      <div>
+                        <h3 className="font-semibold text-lg">{offer.title}</h3>
+                        {offer.description && (
+                          <p className="text-sm text-muted-foreground mt-1">
+                            {offer.description}
+                          </p>
+                        )}
+                      </div>
+
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm text-muted-foreground">
+                            Discount
+                          </p>
+                          <p className="text-xl font-bold text-primary">
+                            {offer.discountType === "percentage"
+                              ? `${offer.discountValue}% OFF`
+                              : `€${parseFloat(offer.discountValue).toFixed(2)} OFF`}
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-sm text-muted-foreground">
+                            Product
+                          </p>
+                          <p className="text-sm font-medium">
+                            {offer.product?.title || "N/A"}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between text-xs text-muted-foreground">
+                        <div>
+                          <p>Starts:</p>
+                          <p className="font-medium">
+                            {new Date(offer.startsAt).toLocaleDateString()}
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <p>Ends:</p>
+                          <p className="font-medium">
+                            {new Date(offer.endsAt).toLocaleDateString()}
+                          </p>
+                        </div>
+                      </div>
+
+                      {offer.salon && (
+                        <div className="pt-2 border-t">
+                          <div className="flex items-center gap-2">
+                            <Building2 className="h-4 w-4 text-muted-foreground" />
+                            <span className="text-sm">{offer.salon.name}</span>
+                          </div>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                ))}
+            </div>
+          )}
         </TabsContent>
       </Tabs>
     </div>

@@ -38,6 +38,7 @@ import {
   Ban,
   CheckCircle,
   Phone,
+  Tag,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -54,9 +55,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from "./ui/dialog";
-import { SalonAPI } from "@/lib/services";
+import { SalonAPI, OfferAPI } from "@/lib/services";
 import { ApiError } from "@/lib/utils/apiClient";
 import type { Salon as APISalon, PaginationResponse } from "@/lib/types/api";
+import type { Offer } from "@/lib/types/offer";
 import { AuthErrorMessage } from "./AuthErrorMessage";
 import { toast } from "sonner";
 
@@ -70,6 +72,7 @@ export function SalonManagement() {
 
   // API State
   const [salons, setSalons] = useState<APISalon[]>([]);
+  const [offers, setOffers] = useState<Offer[]>([]);
   const [allSalonsStats, setAllSalonsStats] = useState<{
     total: number;
     active: number;
@@ -95,6 +98,7 @@ export function SalonManagement() {
   // Fetch overall stats once on mount and when status filter changes
   useEffect(() => {
     fetchAllSalonsStats();
+    fetchOffers();
   }, [statusFilter]);
 
   // Fetch paginated salons when page changes
@@ -132,7 +136,7 @@ export function SalonManagement() {
         pending: allSalons.filter((s) => !s.verified).length,
         totalServices: allSalons.reduce(
           (sum, s) => sum + (s.services?.length || 0),
-          0
+          0,
         ),
       });
     } catch (err) {
@@ -174,6 +178,16 @@ export function SalonManagement() {
       }
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchOffers = async () => {
+    try {
+      const response = await OfferAPI.getActiveOffers();
+      console.log("Fetched offers:", response);
+      setOffers(response.data);
+    } catch (err) {
+      console.error("Failed to fetch offers:", err);
     }
   };
 
@@ -241,8 +255,8 @@ export function SalonManagement() {
             ? addressParts[addressParts.length - 2].trim()
             : "";
         })
-        .filter(Boolean)
-    )
+        .filter(Boolean),
+    ),
   );
 
   // Filter salons based on search and filters
@@ -391,6 +405,102 @@ export function SalonManagement() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Salon Offers Section */}
+      <Card>
+        <CardHeader>
+          <div className="flex justify-between items-center">
+            <div>
+              <CardTitle className="flex items-center gap-2">
+                <Tag className="h-5 w-5" />
+                Salon Offers
+              </CardTitle>
+              <p className="text-sm text-muted-foreground mt-1">
+                Active promotional offers across all salons
+              </p>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {offers.length === 0 ? (
+            <div className="py-8 text-center">
+              <Tag className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <p className="text-muted-foreground">No offers available</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {offers
+                .filter((offer) => offer.offerType === "salon")
+                .slice(0, 6)
+                .map((offer) => (
+                  <Card key={offer.id} className="border">
+                    <CardContent className="p-4 space-y-3">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <h4 className="font-semibold">{offer.title}</h4>
+                          {offer.description && (
+                            <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
+                              {offer.description}
+                            </p>
+                          )}
+                        </div>
+                        <Badge
+                          variant={offer.isActive ? "default" : "secondary"}
+                        >
+                          {offer.isActive ? "Active" : "Inactive"}
+                        </Badge>
+                      </div>
+
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm text-muted-foreground">
+                            Discount
+                          </p>
+                          <p className="text-lg font-bold text-primary">
+                            {offer.discountType === "percentage"
+                              ? `${offer.discountValue}% OFF`
+                              : `€${parseFloat(offer.discountValue).toFixed(2)} OFF`}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between text-xs text-muted-foreground">
+                        <div>
+                          <p>Valid from</p>
+                          <p className="font-medium">
+                            {new Date(offer.startsAt).toLocaleDateString()}
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <p>Valid until</p>
+                          <p className="font-medium">
+                            {new Date(offer.endsAt).toLocaleDateString()}
+                          </p>
+                        </div>
+                      </div>
+
+                      {offer.salon && (
+                        <div className="pt-2 border-t flex items-center gap-2">
+                          <MapPin className="h-4 w-4 text-muted-foreground" />
+                          <span className="text-sm font-medium">
+                            {offer.salon.name}
+                          </span>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                ))}
+            </div>
+          )}
+          {offers.filter((offer) => offer.offerType === "salon").length > 6 && (
+            <div className="mt-4 text-center">
+              <Button variant="outline" size="sm">
+                View All Offers
+              </Button>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Filters */}
       <Card className="p-6">
