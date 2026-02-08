@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
@@ -17,7 +18,6 @@ import {
   Settings,
   ChevronLeft,
   ChevronRight,
-  Scissors,
 } from "lucide-react";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
@@ -131,7 +131,7 @@ export function DashboardSidebar({
           status: "PENDING",
         });
         setPendingBookings(
-          bookingsRes.pagination?.total || bookingsRes.data.length
+          bookingsRes.pagination?.total || bookingsRes.data.length,
         );
       } catch (error) {
         console.error("Failed to fetch counts:", error);
@@ -155,7 +155,7 @@ export function DashboardSidebar({
       className={cn(
         "fixed left-0 top-16 z-40 bg-background border-r transition-all duration-300 overflow-y-auto overscroll-contain h-[calc(100vh-4rem)]",
         isCollapsed ? "w-16" : "w-64",
-        className
+        className,
       )}
       style={{ WebkitOverflowScrolling: "touch" } as React.CSSProperties}
     >
@@ -163,18 +163,14 @@ export function DashboardSidebar({
         {/* Logo and Brand */}
         <div className="flex items-center justify-between px-3 sm:px-5 py-2 sm:py-6 md:mt-1 border-b">
           {!isCollapsed && (
-            <div className="flex items-center gap-1.5 sm:gap-3 min-w-0 flex-1">
-              <div className="w-7 h-7 sm:w-10 sm:h-10 bg-primary rounded-lg flex items-center justify-center flex-shrink-0">
-                <Scissors className="w-3.5 h-3.5 sm:w-5 sm:h-5 text-primary-foreground" />
-              </div>
-              <div className="flex flex-col min-w-0">
-                <span className="font-semibold text-sm sm:text-base text-foreground truncate">
-                  ProBeauty
-                </span>
-                <span className="text-xs text-muted-foreground truncate">
-                  Admin Panel
-                </span>
-              </div>
+            <div className="flex items-center justify-center min-w-0 flex-1">
+              <Image
+                src="/probeauty-header.png"
+                alt="ProBeauty"
+                width={120}
+                height={40}
+                className="h-8 sm:h-10 w-auto object-contain"
+              />
             </div>
           )}
           <Button
@@ -207,13 +203,13 @@ export function DashboardSidebar({
                     isCollapsed ? "px-2" : "px-2 sm:px-3 py-1.5 sm:py-2",
                     isActive
                       ? "bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm"
-                      : "hover:bg-accent text-foreground"
+                      : "hover:bg-accent text-foreground",
                   )}
                 >
                   <item.icon
                     className={cn(
                       "h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0",
-                      isCollapsed ? "" : "mr-2 sm:mr-3"
+                      isCollapsed ? "" : "mr-2 sm:mr-3",
                     )}
                   />
                   {!isCollapsed && (

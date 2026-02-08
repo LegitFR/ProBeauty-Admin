@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import { useAuth } from "@/lib/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -78,7 +79,7 @@ export default function AuthPage() {
         if (!validatePhone(formData.phone)) {
           toast.error(
             "Invalid phone number. Please enter a 10-digit Indian mobile number starting with 6, 7, 8, or 9",
-            { duration: 5000 }
+            { duration: 5000 },
           );
           setIsLoading(false);
           return;
@@ -132,8 +133,14 @@ export default function AuthPage() {
 
         <Card className="w-full max-w-md mx-4 p-8 bg-white/90 dark:bg-black/90 backdrop-blur-lg shadow-2xl border border-gray-200 dark:border-orange-600/30 relative z-10">
           <div className="flex flex-col items-center mb-8">
-            <div className="w-16 h-16 bg-gradient-to-br from-[#FF6A00] to-[#E55A00] rounded-2xl flex items-center justify-center mb-4 shadow-lg shadow-orange-500/20">
-              <Mail className="w-8 h-8 text-white" />
+            <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-4">
+              <Image
+                src="/probeauty-header.png"
+                alt="ProBeauty"
+                width={64}
+                height={64}
+                className="w-16 h-16 object-contain"
+              />
             </div>
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
               Verify Your Email
@@ -209,8 +216,14 @@ export default function AuthPage() {
 
       <Card className="w-full max-w-md mx-3 sm:mx-4 p-4 sm:p-6 md:p-8 bg-white/90 dark:bg-black/90 backdrop-blur-lg shadow-2xl border border-gray-200 dark:border-orange-600/30 relative z-10">
         <div className="flex flex-col items-center mb-6 sm:mb-8">
-          <div className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 bg-gradient-to-br from-[#FF6A00] to-[#E55A00] rounded-2xl flex items-center justify-center mb-3 sm:mb-4 shadow-lg shadow-orange-500/20">
-            <Shield className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-white" />
+          <div className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-2xl flex items-center justify-center mb-3 sm:mb-4">
+            <Image
+              src="/probeauty-header.png"
+              alt="ProBeauty"
+              width={64}
+              height={64}
+              className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 object-contain"
+            />
           </div>
           <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-2">
             {isLogin ? "Welcome Back" : "Join ProBeauty"}
