@@ -165,7 +165,7 @@ export function DashboardSidebar({
           {!isCollapsed && (
             <div className="flex items-center justify-center min-w-0 flex-1">
               <Image
-                src="/probeauty-header.png"
+                src="/probeauty-header.svg"
                 alt="ProBeauty"
                 width={120}
                 height={40}

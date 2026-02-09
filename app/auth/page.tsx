@@ -135,7 +135,7 @@ export default function AuthPage() {
           <div className="flex flex-col items-center mb-8">
             <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-4">
               <Image
-                src="/probeauty-header.png"
+                src="/probeauty-header.svg"
                 alt="ProBeauty"
                 width={64}
                 height={64}
