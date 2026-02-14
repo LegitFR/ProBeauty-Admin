@@ -35,6 +35,7 @@ interface SidebarItem {
 interface DashboardSidebarProps {
   isCollapsed: boolean;
   onToggleCollapse: () => void;
+  isDark: boolean;
   className?: string;
 }
 
@@ -115,6 +116,7 @@ const sidebarItems: (Omit<SidebarItem, "badge"> & {
 export function DashboardSidebar({
   isCollapsed,
   onToggleCollapse,
+  isDark,
   className,
 }: DashboardSidebarProps) {
   const pathname = usePathname();
@@ -165,7 +167,11 @@ export function DashboardSidebar({
           {!isCollapsed && (
             <div className="flex items-center justify-center min-w-0 flex-1">
               <Image
-                src="/probeauty-header.svg"
+                src={
+                  isDark
+                    ? "/probeauty-header.svg"
+                    : "/probeauty-header-black.svg"
+                }
                 alt="ProBeauty"
                 width={120}
                 height={40}

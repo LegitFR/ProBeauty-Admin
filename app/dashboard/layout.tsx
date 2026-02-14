@@ -64,6 +64,7 @@ export default function DashboardLayout({
           <DashboardSidebar
             isCollapsed={sidebarCollapsed}
             onToggleCollapse={toggleSidebarCollapse}
+            isDark={isDark}
             className={`${
               sidebarOpen ? "translate-x-0" : "-translate-x-full"
             } md:translate-x-0`}
