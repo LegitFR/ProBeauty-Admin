@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "ProBeauty Admin - Salon Management System",
+  title: "Pro Beauty Admin",
   description: "Professional salon management system with AI-powered insights",
   icons: {
     icon: "/favicon.ico",
