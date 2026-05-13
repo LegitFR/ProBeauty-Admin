@@ -1,7 +1,23 @@
 import { NextRequest, NextResponse } from "next/server";
 
 const BACKEND_URL =
-  process.env.NEXT_PUBLIC_API_URL || "https://probeauty-backend.onrender.com";
+  process.env.NEXT_PUBLIC_API_URL ||
+  "http://vps-9ebf5d76.vps.ovh.net:5000/api/v1";
+
+function joinBackendUrl(baseUrl: string, path: string): string {
+  const trimmedBase = baseUrl.replace(/\/+$/, "");
+  const normalizedPath = path ? (path.startsWith("/") ? path : `/${path}`) : "";
+
+  // Avoid duplicating /api/v1 when base already includes it.
+  if (
+    trimmedBase.endsWith("/api/v1") &&
+    normalizedPath.startsWith("/api/v1/")
+  ) {
+    return `${trimmedBase}${normalizedPath.replace(/^\/api\/v1/, "")}`;
+  }
+
+  return `${trimmedBase}${normalizedPath}`;
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -18,7 +34,7 @@ export async function POST(request: NextRequest) {
 
     const path = request.nextUrl.searchParams.get("path") || "";
 
-    console.log("🔄 Proxy forwarding to:", `${BACKEND_URL}${path}`);
+    console.log("🔄 Proxy forwarding to:", joinBackendUrl(BACKEND_URL, path));
     console.log("📦 Request body:", body);
 
     // Forward all relevant headers from the original request
@@ -33,7 +49,7 @@ export async function POST(request: NextRequest) {
       console.log("🔑 Forwarding Authorization header");
     }
 
-    const response = await fetch(`${BACKEND_URL}${path}`, {
+    const response = await fetch(joinBackendUrl(BACKEND_URL, path), {
       method: "POST",
       headers,
       body: JSON.stringify(body),
@@ -48,7 +64,7 @@ export async function POST(request: NextRequest) {
       console.error("❌ Non-JSON response:", text);
       return NextResponse.json(
         { message: "Backend returned non-JSON response", details: text },
-        { status: 502 }
+        { status: 502 },
       );
     }
 
@@ -63,7 +79,7 @@ export async function POST(request: NextRequest) {
         message: error.message || "Proxy request failed",
         error: String(error),
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -72,7 +88,10 @@ export async function GET(request: NextRequest) {
   try {
     const path = request.nextUrl.searchParams.get("path") || "";
 
-    console.log("🔄 Proxy GET forwarding to:", `${BACKEND_URL}${path}`);
+    console.log(
+      "🔄 Proxy GET forwarding to:",
+      joinBackendUrl(BACKEND_URL, path),
+    );
 
     // Forward all relevant headers from the original request
     const headers: Record<string, string> = {
@@ -86,7 +105,7 @@ export async function GET(request: NextRequest) {
       console.log("🔑 Forwarding Authorization header");
     }
 
-    const response = await fetch(`${BACKEND_URL}${path}`, {
+    const response = await fetch(joinBackendUrl(BACKEND_URL, path), {
       method: "GET",
       headers,
     });
@@ -100,7 +119,7 @@ export async function GET(request: NextRequest) {
       console.error("❌ Non-JSON response:", text);
       return NextResponse.json(
         { message: "Backend returned non-JSON response", details: text },
-        { status: 502 }
+        { status: 502 },
       );
     }
 
@@ -115,7 +134,7 @@ export async function GET(request: NextRequest) {
         message: error.message || "Proxy request failed",
         error: String(error),
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -170,7 +189,7 @@ export async function PATCH(request: NextRequest) {
       console.error("❌ Non-JSON response:", text);
       return NextResponse.json(
         { message: "Backend returned non-JSON response", details: text },
-        { status: 502 }
+        { status: 502 },
       );
     }
 
@@ -185,7 +204,7 @@ export async function PATCH(request: NextRequest) {
         message: error.message || "Proxy request failed",
         error: String(error),
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -222,7 +241,7 @@ export async function DELETE(request: NextRequest) {
       console.error("❌ Non-JSON response:", text);
       return NextResponse.json(
         { message: "Backend returned non-JSON response", details: text },
-        { status: 502 }
+        { status: 502 },
       );
     }
 
@@ -237,7 +256,7 @@ export async function DELETE(request: NextRequest) {
         message: error.message || "Proxy request failed",
         error: String(error),
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -292,7 +311,7 @@ export async function PUT(request: NextRequest) {
       console.error("❌ Non-JSON response:", text);
       return NextResponse.json(
         { message: "Backend returned non-JSON response", details: text },
-        { status: 502 }
+        { status: 502 },
       );
     }
 
@@ -307,7 +326,7 @@ export async function PUT(request: NextRequest) {
         message: error.message || "Proxy request failed",
         error: String(error),
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

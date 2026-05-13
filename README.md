@@ -41,7 +41,7 @@ Admin login required. Use an account with `ADMIN` role.
 
 ## 🔧 API Configuration
 
-**Default Backend**: `https://probeauty-backend.onrender.com`
+**Default Backend**: `http://vps-9ebf5d76.vps.ovh.net:5000/api/v1`
 
 All requests go through Next.js proxy (`/api/proxy`) to eliminate CORS issues.
 

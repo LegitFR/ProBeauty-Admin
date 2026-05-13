@@ -4,7 +4,8 @@
  */
 
 const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL || "https://probeauty-backend.onrender.com";
+  process.env.NEXT_PUBLIC_API_URL ||
+  "http://vps-9ebf5d76.vps.ovh.net:5000/api/v1";
 
 // ALWAYS use proxy to bypass CORS issues
 // The Next.js API route runs server-side and can call any backend without CORS restrictions
@@ -20,7 +21,7 @@ export class ApiError extends Error {
   constructor(
     public status: number,
     public message: string,
-    public errors?: any[]
+    public errors?: any[],
   ) {
     super(message);
     this.name = "ApiError";
@@ -49,7 +50,7 @@ function buildUrl(path: string): string {
  */
 export async function apiRequest<T>(
   path: string,
-  options: RequestOptions = {}
+  options: RequestOptions = {},
 ): Promise<T> {
   const { requiresAuth = true, isFormData = false, ...fetchOptions } = options;
 
@@ -139,7 +140,7 @@ export async function apiRequest<T>(
       throw new ApiError(
         response.status,
         data.message || "An error occurred",
-        data.errors
+        data.errors,
       );
     }
 
@@ -155,12 +156,12 @@ export async function apiRequest<T>(
       console.error("❌ Network request failed!");
       console.error("URL:", url);
       console.error(
-        "💡 This might be a network connectivity issue or the backend server is down."
+        "💡 This might be a network connectivity issue or the backend server is down.",
       );
 
       throw new ApiError(
         0,
-        "Network request failed. Please check your connection or try again later."
+        "Network request failed. Please check your connection or try again later.",
       );
     }
 
@@ -174,7 +175,7 @@ export async function apiRequest<T>(
  */
 export async function get<T>(
   path: string,
-  options?: RequestOptions
+  options?: RequestOptions,
 ): Promise<T> {
   return apiRequest<T>(path, {
     ...options,
@@ -188,7 +189,7 @@ export async function get<T>(
 export async function post<T>(
   path: string,
   body?: any,
-  options?: RequestOptions
+  options?: RequestOptions,
 ): Promise<T> {
   const isFormData = body instanceof FormData;
 
@@ -198,8 +199,8 @@ export async function post<T>(
     body: isFormData
       ? body
       : body !== undefined
-      ? JSON.stringify(body)
-      : JSON.stringify({}),
+        ? JSON.stringify(body)
+        : JSON.stringify({}),
     isFormData,
   });
 }
@@ -210,7 +211,7 @@ export async function post<T>(
 export async function patch<T>(
   path: string,
   body?: any,
-  options?: RequestOptions
+  options?: RequestOptions,
 ): Promise<T> {
   const isFormData = body instanceof FormData;
 
@@ -228,7 +229,7 @@ export async function patch<T>(
 export async function put<T>(
   path: string,
   body?: any,
-  options?: RequestOptions
+  options?: RequestOptions,
 ): Promise<T> {
   const isFormData = body instanceof FormData;
 
@@ -245,7 +246,7 @@ export async function put<T>(
  */
 export async function del<T>(
   path: string,
-  options?: RequestOptions
+  options?: RequestOptions,
 ): Promise<T> {
   return apiRequest<T>(path, {
     ...options,

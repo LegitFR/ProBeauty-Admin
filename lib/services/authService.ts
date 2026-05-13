@@ -6,16 +6,36 @@ import {
 } from "@/lib/types/auth";
 
 const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL || "https://probeauty-backend.onrender.com";
+  process.env.NEXT_PUBLIC_API_URL ||
+  "http://vps-9ebf5d76.vps.ovh.net:5000/api/v1";
 const AUTH_BASE_PATH = "/api/v1/auth";
 
 // Use proxy to bypass CORS in development
 const USE_PROXY = process.env.NODE_ENV === "development";
 
 class AuthService {
+  private buildApiUrl(path: string): string {
+    const trimmedBase = API_BASE_URL.replace(/\/+$/, "");
+    const normalizedPath = path
+      ? path.startsWith("/")
+        ? path
+        : `/${path}`
+      : "";
+
+    // Avoid duplicating /api/v1 when base already includes it.
+    if (
+      trimmedBase.endsWith("/api/v1") &&
+      normalizedPath.startsWith("/api/v1/")
+    ) {
+      return `${trimmedBase}${normalizedPath.replace(/^\/api\/v1/, "")}`;
+    }
+
+    return `${trimmedBase}${normalizedPath}`;
+  }
+
   private async request<T>(
     endpoint: string,
-    options: RequestInit = {}
+    options: RequestInit = {},
   ): Promise<T> {
     let url: string;
 
@@ -25,7 +45,7 @@ class AuthService {
       url = `/api/proxy?path=${encodeURIComponent(fullPath)}`;
     } else {
       // Direct call in production
-      url = `${API_BASE_URL}${AUTH_BASE_PATH}${endpoint}`;
+      url = this.buildApiUrl(`${AUTH_BASE_PATH}${endpoint}`);
     }
 
     const config: RequestInit = {
@@ -53,13 +73,13 @@ class AuthService {
 
         if (!USE_PROXY) {
           console.error(
-            "💡 TIP: CORS error detected. Enable proxy in development."
+            "💡 TIP: CORS error detected. Enable proxy in development.",
           );
         }
 
         throw new Error(
           error.message ||
-            "Request failed. Please check your network connection."
+            "Request failed. Please check your network connection.",
         );
       }
       throw error;
@@ -72,12 +92,12 @@ class AuthService {
       {
         method: "POST",
         body: JSON.stringify(data),
-      }
+      },
     );
 
     // DEV ONLY - TODO: Remove before production deployment
     console.log(
-      "🔐 OTP SENT - Check console for OTP (email service not configured)"
+      "🔐 OTP SENT - Check console for OTP (email service not configured)",
     );
     console.log("📧 Response:", response);
     // END DEV ONLY
@@ -87,7 +107,7 @@ class AuthService {
 
   async confirmRegistration(
     email: string,
-    otp: string
+    otp: string,
   ): Promise<{ message: string }> {
     return this.request("/confirm-registration", {
       method: "POST",
@@ -118,7 +138,7 @@ class AuthService {
 
   async verifyForgotPasswordOTP(
     email: string,
-    otp: string
+    otp: string,
   ): Promise<{ message: string }> {
     return this.request("/verify-forgot-password-otp", {
       method: "POST",
@@ -136,7 +156,7 @@ class AuthService {
   async resetPassword(
     email: string,
     otp: string,
-    newPassword: string
+    newPassword: string,
   ): Promise<{ message: string }> {
     return this.request("/reset-password", {
       method: "POST",
@@ -145,7 +165,7 @@ class AuthService {
   }
 
   async refreshToken(
-    refreshToken: string
+    refreshToken: string,
   ): Promise<{ message: string; accessToken: string }> {
     return this.request("/refresh-token", {
       method: "POST",
